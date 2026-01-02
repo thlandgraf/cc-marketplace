@@ -1,0 +1,15 @@
+# Claude Code local settings
+.claude/*.local.md
+.claude/settings.local.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+*~
+
+# Logs
+*.log

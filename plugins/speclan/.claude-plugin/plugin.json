@@ -1,0 +1,19 @@
+{
+  "name": "speclan",
+  "version": "0.2.2",
+  "description": "Claude Code helper for SPECLAN - manage project specifications as interlinked markdown files",
+  "author": {
+    "name": "Thomas Landgraf",
+    "email": "tl@digital-dividend.de"
+  },
+  "repository": "https://github.com/digital-dividend/speclan-plugin",
+  "license": "MIT",
+  "keywords": [
+    "speclan",
+    "specifications",
+    "requirements",
+    "documentation",
+    "vscode"
+  ],
+  "commands": "./commands/"
+}

@@ -1,0 +1,31 @@
+{
+  "name": "digital-dividend-marketplace",
+  "owner": {
+    "name": "Thomas Landgraf",
+    "email": "tl@digital-dividend.de",
+    "url": "https://github.com/digital-dividend"
+  },
+  "metadata": {
+    "description": "Claude Code plugins by Digital Dividend",
+    "version": "1.0.1"
+  },
+  "plugins": [
+    {
+      "name": "speclan",
+      "description": "Claude Code helper for SPECLAN - manage project specifications as interlinked markdown files",
+      "version": "0.2.2",
+      "source": "./plugins/speclan",
+      "author": {
+        "name": "Thomas Landgraf",
+        "email": "tl@digital-dividend.de"
+      },
+      "keywords": [
+        "speclan",
+        "specifications",
+        "requirements",
+        "documentation"
+      ],
+      "license": "MIT"
+    }
+  ]
+}
