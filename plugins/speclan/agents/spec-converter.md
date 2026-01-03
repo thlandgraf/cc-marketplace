@@ -12,6 +12,7 @@ tools:
   - Glob
   - Grep
   - Bash
+model: opus
 ---
 
 # Spec Converter Agent

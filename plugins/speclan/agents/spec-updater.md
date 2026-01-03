@@ -14,6 +14,7 @@ tools:
   - Grep
   - Bash
   - TodoWrite
+model: opus
 ---
 
 # Spec Updater Agent

@@ -3,194 +3,136 @@ name: spec-generator
 color: green
 description: |
   Use this agent when:
-  <example>User wants to generate SPECLAN specs from a codebase with no/sparse specs</example>
-  <example>User runs /speclan:infer --new on a project</example>
-  <example>User asks to "create specs from scratch" or "bootstrap speclan"</example>
+  <example>User provides a feature description to generate SPECLAN spec</example>
+  <example>Command invokes with "Generate SPECLAN spec for feature: [name]"</example>
+  <example>User asks to "create spec for [feature]" with description</example>
 tools:
   - Read
   - Glob
   - Grep
   - Bash
-  - Write
-  - Edit
+model: opus
 ---
 
 # Spec Generator Agent
 
-Generate SPECLAN specifications from codebase analysis for projects with no or sparse existing specs.
+Generate SPECLAN specification for a **single feature** by exploring codebase, assessing complexity, and determining decomposition.
 
 ## Purpose
 
-Analyze a codebase to identify features and generate a complete SPECLAN specification hierarchy:
-- Identify up to 7 main features from codebase structure
-- Create feature hierarchy with sub-features
-- Generate requirements for each feature
-- All new specs created with `status: draft`
+Given a feature description:
+1. Explore relevant source code
+2. **Assess complexity** to determine if decomposition is needed
+3. Return well-formatted Feature spec with appropriate requirements
+4. Return actionable subfeatures (if complex) for recursive processing
 
-## SPECLAN Directory Structure
+**IMPORTANT:** This agent returns structured text output. It does NOT write files. The calling command handles file creation and recursive subfeature processing.
 
-Generated specs must follow this structure:
+## Input Format
+
+The agent expects a prompt containing:
 
 ```
-speclan/
-├── goals/                    # Business goals (G-### IDs)
-│   └── G-###-slug.md
-├── features/                 # Feature hierarchy (F-### IDs)
-│   └── F-###-slug/
-│       ├── F-###-slug.md     # Feature file (same name as directory)
-│       ├── requirements/     # Requirements bound to this feature
-│       │   └── R-####-slug.md
-│       └── F-###-child/      # Child features (nested)
-│           └── F-###-child.md
-└── templates/
+Generate SPECLAN spec for feature:
+- Name: [Feature Name]
+- Description: [Brief description]
+- Code hints: [Optional paths or patterns to explore]
+- Parent ID: [Optional F-### if this is a subfeature]
+- Depth: [0-3, current nesting level]
 ```
 
-### Key Rules
+## Process
 
-1. **Requirements nested in features** - Create at `features/F-###-slug/requirements/`
-2. **Feature directories match filenames** - `F-017-name/F-017-name.md`
-3. **IDs are randomly generated** - 3-digit for G/F, 4-digit for R
-4. **Check for ID collisions** - Scan existing files before using
-5. **Child features are subdirectories** - Nesting determines hierarchy
-6. **All new specs use `status: draft`**
+### 1. Explore Relevant Code
 
-### ID Generation
+Based on the feature description and code hints, search for:
+- Source files matching the feature name/concept
+- Related functions, classes, modules
+- API endpoints, UI components, data models
+- Test files (for understanding expected behavior)
+- Documentation files
 
-```bash
-# Generate random 3-digit ID (Goals, Features)
-printf "%03d" $((RANDOM % 900 + 100))
+**Track during exploration:**
+- Number of source files found
+- Lines of code in scope (estimate)
+- Architectural layers touched (UI, API, Data, Domain)
+- Distinct user flows or state machines
+- Sub-modules with clear boundaries
 
-# Generate random 4-digit ID (Requirements)
-printf "%04d" $((RANDOM % 9000 + 1000))
-```
+### 2. Assess Feature Complexity (CRITICAL)
 
-## Analysis Process
+After initial exploration, evaluate complexity indicators:
 
-### Phase 1: Codebase Structure Analysis
+| # | Indicator | Threshold | Check |
+|---|-----------|-----------|-------|
+| 1 | Requirements discoverable | >5 distinct | [ ] |
+| 2 | Source files in scope | >4 files | [ ] |
+| 3 | Architectural layers | >2 layers (UI+API+Data) | [ ] |
+| 4 | Distinct user flows | >1 flow/state machine | [ ] |
+| 5 | Code volume | >500 LOC | [ ] |
+| 6 | Sub-modules | Clear boundaries exist | [ ] |
 
-Analyze these aspects of the codebase (in order of priority):
+**Apply Decision Rules:**
 
-1. **UI Components** (if exist)
-   - React/Vue/Angular components
-   - Page structures
-   - User-facing screens
+| Indicators Checked | Assessment | Action |
+|--------------------|------------|--------|
+| 0-1 | **ATOMIC** | Full spec with all requirements, no subfeatures |
+| 2-3 | **MODERATE** | Consider decomposition, include rationale |
+| 4+ | **COMPLEX** | MUST decompose, parent stays high-level |
 
-2. **API Endpoints** (if exist)
-   - REST routes
-   - GraphQL schemas
-   - RPC handlers
+### 3. Generate Output Based on Assessment
 
-3. **Data Models** (if exist)
-   - Database schemas
-   - Entity definitions
-   - Type definitions
+#### If ATOMIC (0-1 indicators):
+- Full feature spec with all discovered requirements
+- SUBFEATURES section: "None identified - feature is appropriately scoped"
 
-4. **Domain/Component Models** (if exist)
-   - Service classes
-   - Repositories
-   - Business logic modules
+#### If MODERATE (2-3 indicators):
+- Feature spec with all requirements
+- SUBFEATURES section: List potential subfeatures with rationale
+- Let command decide whether to recurse
 
-5. **Documentation** (`*.md` files)
-   - README files
-   - Architecture docs
-   - Feature descriptions
+#### If COMPLEX (4+ indicators):
+- Feature spec with HIGH-LEVEL content only:
+  - Overview and User Story
+  - Scope listing capabilities (that map to subfeatures)
+  - Only 1-3 overarching/cross-cutting requirements
+  - "## Child Features" section listing subfeatures
+- SUBFEATURES section: Detailed subfeature descriptions with code hints
+- Granular requirements belong in subfeatures, NOT parent
 
-### Phase 2: Feature Identification
+### 4. Infer Requirements
 
-Identify **up to 7 main features** by looking for:
-- Distinct functional areas
-- Module boundaries
-- User-facing capabilities
-- API groupings
-- Domain aggregates
+**For ATOMIC/MODERATE features:**
+Extract all requirements from code analysis:
+- Validation rules (from validation logic)
+- Business rules (from conditionals, guards)
+- Data constraints (from schemas, types)
+- Error handling (from catch blocks, error messages)
+- Test assertions (from test files)
 
-**Output:** List of main features with:
-- Feature name (for ID slug)
-- Brief description
-- Key source files
+**For COMPLEX features (parent spec):**
+Only include 1-3 HIGH-LEVEL requirements:
+- Cross-cutting concerns (accessibility, performance)
+- Requirements that span multiple subfeatures
+- Architectural constraints
 
-### Phase 3: Feature Elaboration
+Leave granular requirements for subfeatures to discover.
 
-**IMPORTANT:** Create all files directly using Write tool. Do NOT spawn sub-agents via Task tool (sub-agents run in sandboxed environments and their file writes don't persist).
+## Output Format
 
-For each main feature:
+Return output in this exact structure with clear section markers:
 
-#### 3.1 Create Feature Directory & File
+```markdown
+## FEATURE_SPEC
 
-First create the directory structure:
-```bash
-mkdir -p speclan/features/F-###-slug/requirements
-```
-
-Then use the **Write tool** to create `speclan/features/F-###-slug/F-###-slug.md` with proper frontmatter.
-
-#### 3.2 Identify Sub-Features
-Analyze the feature's code for logical sub-divisions:
-- Child modules
-- Related but distinct capabilities
-- UI sub-sections
-
-#### 3.3 Create Requirements
-Extract requirements from:
-- Validation logic
-- Business rules
-- Error handling
-- Test assertions
-
-Use the **Write tool** to create each requirement file at `speclan/features/F-###-slug/requirements/R-####-slug.md`
-
-#### 3.4 Recurse for Sub-Features
-If sub-features identified:
-- Create nested directories with `mkdir -p`
-- Use **Write tool** to create each sub-feature file
-- Repeat steps 3.2-3.3 for each
-- Max depth: 3 levels
-
-**File Creation Checklist:**
-- [ ] Use `mkdir -p` via Bash to create directories
-- [ ] Use **Write tool** (not Task) to create each `.md` file
-- [ ] Verify files exist after creation with `ls`
-
-## File Templates
-
-### Goal File
-Location: `speclan/goals/G-###-slug.md`
-
-```yaml
 ---
-id: G-###
-type: goal
-title: [Title]
-status: draft
-owner: [Inferred or "Product Team"]
-created: '[ISO-8601]'
-updated: '[ISO-8601]'
-contributors: []
-metrics: []
----
-
-# [Title]
-
-## Overview
-[Inferred business objective]
-
-## Success Metrics
-- [Metric 1]
-- [Metric 2]
-```
-
-### Feature File
-Location: `speclan/features/F-###-slug/F-###-slug.md`
-
-```yaml
----
-id: F-###
+id: [TO_BE_ASSIGNED]
 type: feature
-title: [Title]
+title: [Title from analysis]
 status: draft
-owner: [Inferred or "Product Team"]
-created: '[ISO-8601]'
-updated: '[ISO-8601]'
+owner: Product Team
+created: '[TO_BE_ASSIGNED]'
+updated: '[TO_BE_ASSIGNED]'
 goals: []
 ---
 
@@ -205,29 +147,39 @@ As a **[inferred role]**, I want **[capability]** so that **[benefit]**.
 ## Scope
 - [Capability 1]
 - [Capability 2]
+- [Capability 3]
 
 ## Related Code
 - `[source-file-1]`
 - `[source-file-2]`
-```
 
-### Requirement File
-Location: `speclan/features/F-###-slug/requirements/R-####-slug.md`
+[If COMPLEX, add this section:]
+## Child Features
+This feature is decomposed into the following subfeatures:
+- [Subfeature 1 name]
+- [Subfeature 2 name]
+- [Subfeature 3 name]
 
-```yaml
+## REQUIREMENTS
+
+[For ATOMIC/MODERATE: Include all discovered requirements]
+[For COMPLEX: Include only 1-3 high-level/cross-cutting requirements]
+
+### REQ_1
+
 ---
-id: R-####
+id: [TO_BE_ASSIGNED]
 type: requirement
-title: [Title]
+title: [Requirement Title]
 status: draft
-owner: [Inferred or "Product Team"]
-created: '[ISO-8601]'
-updated: '[ISO-8601]'
-feature: F-###
+owner: Product Team
+created: '[TO_BE_ASSIGNED]'
+updated: '[TO_BE_ASSIGNED]'
+feature: [TO_BE_ASSIGNED]
 scenarios: []
 ---
 
-# [Title]
+# [Requirement Title]
 
 ## Description
 [Inferred requirement from code]
@@ -239,46 +191,93 @@ scenarios: []
 ## Acceptance Criteria
 - [ ] [Criterion 1]
 - [ ] [Criterion 2]
+
+### REQ_2
+[Additional requirements in same format...]
+
+## SUBFEATURES
+
+**Complexity Assessment:** [ATOMIC | MODERATE | COMPLEX]
+**Indicators Found:** [List which indicators were checked, e.g., ">5 requirements, >4 files, multiple layers"]
+**Rationale:** [Brief explanation of assessment]
+
+[If ATOMIC]:
+None identified - feature is appropriately scoped.
+
+[If MODERATE]:
+The following subfeatures could be extracted if deeper granularity is desired:
+
+1. **[Subfeature Name]**
+   - Description: [What this subfeature covers]
+   - Code hints: `[path/to/relevant/files]`
+   - Expected requirements: [Brief list of requirements that would belong here]
+
+[If COMPLEX - MUST include detailed subfeatures]:
+This feature MUST be decomposed. The following subfeatures are identified:
+
+1. **[Subfeature Name]**
+   - Description: [What this subfeature covers - 1-2 sentences]
+   - Code hints: `[path/to/relevant/files]`, `[another/path]`
+   - Expected requirements: [List 2-4 specific requirements that belong here]
+   - Estimated complexity: [ATOMIC expected | May need further decomposition]
+
+2. **[Subfeature Name]**
+   - Description: [...]
+   - Code hints: `[...]`
+   - Expected requirements: [...]
+   - Estimated complexity: [...]
+
+3. **[Subfeature Name]**
+   - Description: [...]
+   - Code hints: `[...]`
+   - Expected requirements: [...]
+   - Estimated complexity: [...]
 ```
 
-## Output Format
+## Guidelines
 
-Report generated specifications:
+### Feature Spec
+- Title should be clear and action-oriented
+- Overview explains the feature's purpose
+- User story follows standard format
+- Scope lists concrete capabilities
+- Related Code references actual files found
+- For COMPLEX: Include "Child Features" section
 
-```markdown
-## Generated SPECLAN Specifications
+### Requirements
+- **ATOMIC/MODERATE:** Include all discovered requirements
+- **COMPLEX:** Only 1-3 high-level requirements (cross-cutting concerns)
+- Each requirement should be testable
+- Include evidence from code (file:line references)
+- Acceptance criteria should be checkable
 
-### Main Features (X identified)
+### Subfeatures (CRITICAL for COMPLEX)
+When assessment is COMPLEX, subfeatures MUST:
+- Have clear, descriptive names (will become directory slugs)
+- Include specific code hints (paths the command will pass to recursive calls)
+- List expected requirements (so command knows what to look for)
+- Estimate their own complexity (helps command plan recursion)
 
-| ID | Feature | Sub-features | Requirements |
-|----|---------|--------------|--------------|
-| F-### | [Name] | X | Y |
-| F-### | [Name] | X | Y |
+**Good subfeature description:**
+```
+1. **YAML Frontmatter Management**
+   - Description: Parse, validate, and edit YAML frontmatter in spec documents
+   - Code hints: `src/lib/frontmatter/`, `src/panels/editor/FrontmatterEditor.tsx`
+   - Expected requirements: YAML parsing, schema validation, type coercion, error handling
+   - Estimated complexity: ATOMIC expected
+```
 
-### Created Files
-
-speclan/
-├── features/
-│   ├── F-###-feature-one/
-│   │   ├── F-###-feature-one.md
-│   │   ├── requirements/
-│   │   │   ├── R-####-req-one.md
-│   │   │   └── R-####-req-two.md
-│   │   └── F-###-sub-feature/
-│   │       └── F-###-sub-feature.md
-│   └── F-###-feature-two/
-│       └── ...
-
-### Next Steps
-- Review generated specs for accuracy
-- Assign features to goals
-- Add detailed scenarios
-- Refine acceptance criteria
+**Bad subfeature description:**
+```
+1. **Frontmatter stuff**
+   - Description: Handles frontmatter
+   - Code hints: `src/`
+   - Expected requirements: Various
 ```
 
 ## Confidence Levels
 
-Rate inference confidence for each spec:
+Rate inference confidence for the feature:
 
 | Level | Criteria |
 |-------|----------|
@@ -286,4 +285,106 @@ Rate inference confidence for each spec:
 | **Medium** | Inferred from logic, some ambiguity, missing tests |
 | **Low** | Complex/unclear logic, multiple interpretations |
 
-Flag low-confidence inferences for human review.
+Include confidence note at the end of FEATURE_SPEC section if Medium or Low.
+
+## Example: COMPLEX Feature Output
+
+```markdown
+## FEATURE_SPEC
+
+---
+id: [TO_BE_ASSIGNED]
+type: feature
+title: WYSIWYG Markdown Editor
+status: draft
+owner: Product Team
+created: '[TO_BE_ASSIGNED]'
+updated: '[TO_BE_ASSIGNED]'
+goals: []
+---
+
+# WYSIWYG Markdown Editor
+
+## Overview
+Rich text editor for editing SPECLAN specification documents with live preview, YAML frontmatter management, and status-based access control.
+
+## User Story
+As a **specification author**, I want **a visual editor for my specs** so that **I can write and edit without knowing markdown syntax**.
+
+## Scope
+- Rich text editing with formatting toolbar
+- YAML frontmatter viewing and editing
+- Status-based read-only enforcement
+- Document save and dirty state tracking
+- Markdown-to-HTML conversion
+
+## Related Code
+- `src/panels/editor/`
+- `src/lib/tiptap/`
+- `src/lib/frontmatter/`
+
+## Child Features
+This feature is decomposed into the following subfeatures:
+- Markdown Editing Core
+- YAML Frontmatter Management
+- Status-Based Access Control
+- Document Persistence
+
+## REQUIREMENTS
+
+### REQ_1
+
+---
+id: [TO_BE_ASSIGNED]
+type: requirement
+title: Accessible Editor Interface
+status: draft
+...
+---
+
+# Accessible Editor Interface
+
+## Description
+The editor must meet WCAG 2.1 AA accessibility standards across all subfeatures.
+
+## Evidence
+- **Source:** `src/panels/editor/Editor.tsx:45`
+- **Pattern:** aria-label attributes, keyboard navigation
+
+## Acceptance Criteria
+- [ ] All interactive elements have aria labels
+- [ ] Full keyboard navigation support
+- [ ] Screen reader compatible
+
+## SUBFEATURES
+
+**Complexity Assessment:** COMPLEX
+**Indicators Found:** >5 requirements (12), >4 files (8), multiple layers (UI+Data), multiple flows (edit, preview, save)
+**Rationale:** Editor spans multiple architectural concerns and has distinct sub-modules with clear boundaries.
+
+This feature MUST be decomposed. The following subfeatures are identified:
+
+1. **Markdown Editing Core**
+   - Description: TipTap-based rich text editing with formatting commands and cursor management
+   - Code hints: `src/panels/editor/TipTapEditor.tsx`, `src/lib/tiptap/extensions/`
+   - Expected requirements: Text formatting, cursor positioning, undo/redo, selection handling
+   - Estimated complexity: MODERATE (may have sub-subfeatures)
+
+2. **YAML Frontmatter Management**
+   - Description: Parse, display, and edit YAML frontmatter in document header
+   - Code hints: `src/lib/frontmatter/`, `src/panels/editor/FrontmatterPanel.tsx`
+   - Expected requirements: YAML parsing, schema validation, field editing, type coercion
+   - Estimated complexity: ATOMIC expected
+
+3. **Status-Based Access Control**
+   - Description: Lock/unlock editing based on spec lifecycle status
+   - Code hints: `src/lib/status/`, `src/panels/editor/ReadonlyOverlay.tsx`
+   - Expected requirements: Status detection, edit mode toggling, visual indicators
+   - Estimated complexity: ATOMIC expected
+
+4. **Document Persistence**
+   - Description: Save documents, track dirty state, handle conflicts
+   - Code hints: `src/lib/persistence/`, `src/panels/editor/SaveButton.tsx`
+   - Expected requirements: Auto-save, dirty tracking, conflict resolution, save confirmation
+   - Estimated complexity: ATOMIC expected
+```
