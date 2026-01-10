@@ -33,7 +33,7 @@ You will receive input in one of these formats:
 **Specific features:**
 ```
 Verify features:
-- F-049-{slug}
+- F-1049-{slug}
 - F-200-{slug}
 
 SPECLAN directory: speclan/
@@ -61,7 +61,7 @@ SPECLAN directory: speclan/
 
 Create todo items:
 ```
-- Verify F-049: Pet Management (pending)
+- Verify F-1049: Pet Management (pending)
 - Verify F-200: Pet Health (pending)
 ```
 
@@ -76,7 +76,7 @@ Read the feature hierarchy from root to leaf:
 ```
 Goal (G-XXX)
   └── Parent Feature (if any)
-        └── THIS FEATURE (F-XXX)
+        └── THIS FEATURE (F-XXXX)
               ├── Requirements (R-XXXX)
               │     ├── Scenarios (S-XXXX)
               │     └── Acceptance Criteria (AC-XXXX)
@@ -87,7 +87,7 @@ Goal (G-XXX)
 
 1. **Read the feature spec:**
    ```bash
-   cat speclan/features/F-XXX-*/F-XXX-*.md
+   cat speclan/features/F-XXXX-*/F-XXXX-*.md
    ```
 
 2. **Traverse UP to root:**
@@ -96,8 +96,11 @@ Goal (G-XXX)
    - Continue until no more parents
 
 3. **Traverse DOWN to sub-artifacts:**
-   - Find requirements: `grep -r "^feature: F-XXX" speclan/requirements/`
-   - For each requirement, find scenarios and acceptance criteria
+   - Find requirements in feature's requirements directory:
+     ```bash
+     find speclan/features/F-XXXX-*/requirements -type d -name 'R-*' 2>/dev/null
+     ```
+   - For each requirement directory, read the requirement file and find scenarios
    - Check for sub-features in directory structure
 
 4. **Follow markdown links (selective):**
@@ -121,7 +124,7 @@ From the feature context, identify what must be verified:
 
 Create verification checklist:
 ```
-Feature F-049: Pet Management
+Feature F-1049: Pet Management
 ├── [ ] Core pet entity exists
 ├── [ ] CRUD operations implemented
 ├── [ ] Status lifecycle enforced
@@ -225,7 +228,7 @@ Identify missing implementations:
 #### Report Structure
 
 ```markdown
-# Verification Report: F-XXX - [Title]
+# Verification Report: F-XXXX - [Title]
 
 ## Summary
 | Metric | Value |
@@ -321,7 +324,7 @@ After verifying all features, generate summary:
 ## Overview
 | Feature | Status | Coverage | Critical | Major | Minor |
 |---------|--------|----------|----------|-------|-------|
-| F-049 | ✅ | 95% | 0 | 1 | 2 |
+| F-1049 | ✅ | 95% | 0 | 1 | 2 |
 | F-200 | ⚠️ | 70% | 1 | 2 | 1 |
 | F-301 | ❌ | 30% | 3 | 2 | 0 |
 
@@ -339,7 +342,7 @@ After verifying all features, generate summary:
 ## Recommended Priority
 1. F-301 - Most gaps, needs attention
 2. F-200 - One critical issue
-3. F-049 - Minor polish only
+3. F-1049 - Minor polish only
 ```
 
 ## Confidence Levels
@@ -365,7 +368,7 @@ Always report confidence level with findings.
 
 ### Feature with no requirements
 ```
-Feature F-XXX has no linked requirements.
+Feature F-XXXX has no linked requirements.
 Verifying based on:
 - Feature overview/scope
 - User story workflow
@@ -380,7 +383,7 @@ Returning spec analysis only.
 
 ### Already verified recently
 ```
-Feature F-XXX was verified [date].
+Feature F-XXXX was verified [date].
 Re-running verification...
 [or skip if --skip-recent flag]
 ```

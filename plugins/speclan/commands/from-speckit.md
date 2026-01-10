@@ -30,7 +30,7 @@ This command requires understanding of both formats:
 **SPECLAN Format** (target):
 - Located in `speclan/` directory
 - Entity hierarchy: Goal → Feature → Requirement → Scenario → AC → Test
-- YAML frontmatter with proper IDs (G-###, F-###, R-####, etc.)
+- YAML frontmatter with proper IDs (G-###, F-####, R-####, etc.)
 
 ## Instructions
 
@@ -76,7 +76,7 @@ Convert speckit elements to SPECLAN:
 
 | Speckit Element | SPECLAN Entity |
 |-----------------|----------------|
-| Feature Branch | Feature (F-###) |
+| Feature Branch | Feature (F-####) |
 | User Story | Feature description / User Story section |
 | Functional Requirement (FR-###) | Requirement (R-####) |
 | Acceptance Scenario | Scenario (S-####) |
@@ -153,7 +153,7 @@ Converted [X] speckit specifications to SPECLAN format.
 
 ### Files Created
 - speclan/features/F-001-phase1-core-extension/F-001-phase1-core-extension.md
-- speclan/requirements/R-0001-...md
+- speclan/features/F-001-.../requirements/R-0001-slug/R-0001-slug.md
 - ...
 
 ### Next Steps

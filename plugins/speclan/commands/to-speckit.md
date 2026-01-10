@@ -1,5 +1,5 @@
 ---
-name: to-speckit
+name: speclan:to-speckit
 description: Inject approved SPECLAN Features into speckit for specification processing
 allowed-tools:
   - Read

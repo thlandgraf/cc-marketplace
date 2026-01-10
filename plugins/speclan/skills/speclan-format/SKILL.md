@@ -1,6 +1,6 @@
 ---
 name: SPECLAN Format
-description: This skill should be used when the user works with SPECLAN specification files, asks to "create a spec", "write a requirement", "add a feature", "update specification", mentions "speclan directory", "YAML frontmatter for specs", "spec hierarchy", or needs guidance on SPECLAN file format, entity types (Goal, Feature, Requirement, Scenario, AcceptanceCriterion, Test), ID conventions (G-###, F-###, R-####), or specification writing best practices.
+description: This skill should be used when the user works with SPECLAN specification files, asks to "create a spec", "write a requirement", "add a feature", "update specification", mentions "speclan directory", "YAML frontmatter for specs", "spec hierarchy", or needs guidance on SPECLAN file format, entity types (Goal, Feature, Requirement, Scenario, AcceptanceCriterion, Test), ID conventions (G-###, F-####, R-####), or specification writing best practices.
 version: 0.1.0
 ---
 
@@ -15,16 +15,20 @@ SPECLAN specifications live in `${PROJECT}/speclan/`:
 ```
 speclan/
 ├── goals/                    # G-### Business goals (flat)
-├── features/                 # F-### Feature hierarchy
-│   └── F-049-pet-management/
-│       ├── F-049-pet-management.md       # Feature file matches directory
-│       ├── requirements/                  # Requirements nested in feature
-│       │   ├── R-2046-health-check.md
-│       │   └── R-3272-status-tracking.md
+├── features/                 # F-#### Feature hierarchy
+│   └── F-1049-pet-management/
+│       ├── F-1049-pet-management.md      # Feature file matches directory
+│       ├── requirements/                  # Requirements as directories
+│       │   ├── R-2046-health-check/
+│       │   │   ├── R-2046-health-check.md
+│       │   │   ├── change-requests/       # CRs for this requirement
+│       │   │   └── scenarios/             # Scenarios for this requirement
+│       │   └── R-3272-status-tracking/
+│       │       └── R-3272-status-tracking.md
 │       ├── change-requests/               # CRs for this feature
 │       │   └── CR-0731-add-feature.md
-│       └── F-200-pet-health/              # Child feature (nested)
-│           └── F-200-pet-health.md
+│       └── F-1200-pet-health/             # Child feature (nested)
+│           └── F-1200-pet-health.md
 ├── templates/                # Templates (UUID in frontmatter, slug filename)
 │   ├── features/
 │   ├── requirements/
@@ -35,16 +39,16 @@ speclan/
 ```
 
 **Key structural rules:**
-- Requirements are **always nested inside their parent feature's** `requirements/` directory
-- Feature directories **must match** the contained markdown filename
-- Child features are **subdirectories** of parent features
-- Change requests live in `change-requests/` adjacent to the entity they modify
+- **Features and Requirements use directory-based storage** - directory name must match contained markdown filename
+- Requirements are nested inside their parent feature's `requirements/` directory as subdirectories
+- Child features are subdirectories of parent features
+- Change requests live in `change-requests/` adjacent to the entity they modify (features OR requirements)
 
 ## Entity Hierarchy
 
 ```
 Goal (G-###)
-  └── Feature (F-###)  [forms hierarchical tree via directories]
+  └── Feature (F-####)  [forms hierarchical tree via directories]
         └── Requirement (R-####)
               └── Scenario (S-####)
                     └── AcceptanceCriterion (AC-####)
@@ -59,27 +63,36 @@ Additional entities:
 
 | Entity | Format | Example | Storage Location |
 |--------|--------|---------|------------------|
-| Goal | `G-###` | G-292 | `goals/` (flat) |
-| Feature | `F-###` | F-049 | `features/` (hierarchical) |
-| Requirement | `R-####` | R-2046 | `features/{feature}/requirements/` |
-| Scenario | `S-####` | S-0001 | *Not yet implemented* |
+| Goal | `G-###` | G-292 | `goals/` (flat files) |
+| Feature | `F-####` | F-1049 | `features/` (hierarchical directories) |
+| Requirement | `R-####` | R-2046 | `features/{feature}/requirements/` (directories) |
+| Scenario | `S-####` | S-0001 | `requirements/{requirement}/scenarios/` (directories) |
 | AcceptanceCriterion | `AC-####` | AC-0001 | *Not yet implemented* |
 | Test | `T-####` | T-0001 | *Not yet implemented* |
-| ChangeRequest | `CR-####` | CR-0731 | `{entity}/change-requests/` |
-| Template | UUID v4 | bf5cb38b-... | `templates/{type}/` |
+| ChangeRequest | `CR-####` | CR-0731 | `{entity}/change-requests/` (flat files) |
+| Template | UUID v4 | bf5cb38b-... | `templates/{type}/` (flat files) |
 
 **ID Generation:** All numeric IDs are **randomly generated** with collision detection (not sequential). Always check existing IDs before creating new ones.
+
+**ID-Based Ordering:** IDs determine artifact priority/order numerically:
+- **Lower IDs = Higher priority** (processed/displayed first)
+- **Higher IDs = Lower priority** (processed/displayed later)
+- Example: F-1049 has higher priority than F-2847
+- This ordering applies within the same entity type (features sorted among features, requirements among requirements, etc.)
 
 ## File Naming Convention
 
 Files follow pattern: `<ID>-kebab-case-title.md`
 
 Examples:
-- `G-292-comprehensive-pet-retail-operations.md`
-- `F-049-pet-management.md`
-- `R-0001-pets-in-quarantine-cannot-be-sold.md`
+- `G-292-comprehensive-pet-retail-operations.md` (flat file in goals/)
+- `F-1049-pet-management/F-1049-pet-management.md` (directory-based)
+- `R-2046-health-check/R-2046-health-check.md` (directory-based)
 
-Feature directories **must match** filenames: `F-049-pet-management/F-049-pet-management.md`
+**Directory-based entities** (Features, Requirements, Scenarios):
+- Directory name **must match** the contained markdown filename
+- Example: `F-1049-pet-management/F-1049-pet-management.md`
+- Example: `R-2046-health-check/R-2046-health-check.md`
 
 Template filenames use **kebab-case slugs** (UUID stored in frontmatter only):
 - `basic-feature.md`
@@ -91,7 +104,7 @@ Every spec file has YAML frontmatter followed by markdown content:
 
 ```markdown
 ---
-id: F-049
+id: F-1049
 type: feature
 title: Pet Management
 status: draft
@@ -160,8 +173,8 @@ draft → review → approved → in-development → under-test → released →
 ```yaml
 # Goal references features
 contributors:
-  - F-049
-  - F-247
+  - F-1049
+  - F-2247
 
 # Feature references goals
 goals:
@@ -169,7 +182,7 @@ goals:
   - G-087
 
 # Requirement references parent feature
-feature: F-009
+feature: F-1009
 
 # Requirement references scenarios
 scenarios:
@@ -187,7 +200,7 @@ Use relative paths in markdown content:
 - [Animal Welfare Compliance](../goals/G-087-animal-welfare-compliance.md)
 
 ### Features
-- [Pet Status Lifecycle](../F-807-pet-status-lifecycle/F-807-pet-status-lifecycle.md)
+- [Pet Status Lifecycle](../F-1807-pet-status-lifecycle/F-1807-pet-status-lifecycle.md)
 ```
 
 ## Working with SPECLAN Files
@@ -223,39 +236,44 @@ To create a new spec:
 
 2. **Generate a unique ID:**
    - IDs are **randomly generated** (not sequential)
-   - Goals/Features: 3-digit (e.g., F-249)
-   - Requirements/Scenarios/etc.: 4-digit (e.g., R-2046)
+   - Goals: 3-digit (e.g., G-249)
+   - Features/Requirements/Scenarios/etc.: 4-digit (e.g., F-1049, R-2046)
    - **Always check for collisions** before using:
      ```bash
      # Check existing Feature IDs
-     ls speclan/features/ | grep -oE 'F-[0-9]+' | sort -u
+     find speclan/features -type d -name 'F-*' | grep -oE 'F-[0-9]+' | sort -u
      # Check existing Requirement IDs
-     find speclan/features -name 'R-*.md' | grep -oE 'R-[0-9]+' | sort -u
+     find speclan/features -type d -name 'R-*' | grep -oE 'R-[0-9]+' | sort -u
      ```
 
 3. **Create file in correct location:**
 
-   **For Goals:** `speclan/goals/G-###-slug.md`
+   **For Goals:** `speclan/goals/G-###-slug.md` (flat file)
 
    **For Features:** Create directory AND file with matching name:
    ```
-   speclan/features/F-###-slug/F-###-slug.md
+   speclan/features/F-####-slug/F-####-slug.md
    ```
 
-   **For Requirements:** Create inside parent feature's `requirements/` directory:
+   **For Requirements:** Create directory inside parent feature's `requirements/`:
    ```
-   speclan/features/F-###-parent/requirements/R-####-slug.md
+   speclan/features/F-####-parent/requirements/R-####-slug/R-####-slug.md
    ```
 
    **For Child Features:** Nest inside parent feature directory:
    ```
-   speclan/features/F-###-parent/F-###-child/F-###-child.md
+   speclan/features/F-####-parent/F-####-child/F-####-child.md
+   ```
+
+   **For Scenarios:** Nest inside parent requirement directory:
+   ```
+   speclan/features/.../requirements/R-####-parent/scenarios/S-####-slug/S-####-slug.md
    ```
 
 4. **Write frontmatter and content:**
    - Use template if found, otherwise use default structure
    - Set all required fields (id, type, title, status, owner, created, updated)
-   - For requirements, set `feature: F-###` to link to parent
+   - For requirements, set `feature: F-####` to link to parent
 
 5. **Update related entities** to establish bidirectional links
 

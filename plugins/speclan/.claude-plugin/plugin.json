@@ -1,6 +1,6 @@
 {
   "name": "speclan",
-  "version": "0.3.8",
+  "version": "0.6.2",
   "description": "Claude Code helper for SPECLAN - manage project specifications as interlinked markdown files",
   "author": {
     "name": "Thomas Landgraf",
@@ -20,11 +20,7 @@
     "./agents/feature-verifier.md",
     "./agents/implementation-order.md",
     "./agents/requirement-verifier.md",
-    "./agents/spec-converter.md",
-    "./agents/spec-generator.md",
-    "./agents/spec-generator-v2.md",
-    "./agents/spec-map-from-code.md",
-    "./agents/spec-updater.md"
+    "./agents/spec-converter.md"
   ],
   "skills": "./skills/"
 }

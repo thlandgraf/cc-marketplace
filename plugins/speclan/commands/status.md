@@ -1,5 +1,5 @@
 ---
-name: status
+name: speclan:status
 description: Check SPECLAN project setup, installed plugins, and specification statistics
 allowed-tools:
   - Read

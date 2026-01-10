@@ -2,6 +2,7 @@
 name: SPECLAN ID Generator
 description: This skill should be used when generating IDs for SPECLAN entities, creating new specs, or needing collision-free unique identifiers. Use when user asks to "create a spec", "generate ID", "new feature ID", "unique requirement ID", or when commands need to assign IDs to new entities.
 version: 0.1.0
+context: fork
 ---
 
 # SPECLAN ID Generator
@@ -11,7 +12,7 @@ Generate unique, collision-free random IDs for SPECLAN entities with automatic r
 ## Why Use This Skill
 
 - **Collision-free:** Automatically checks existing IDs and retries if collision detected
-- **Entity-aware:** Correct format for each entity type (3-digit vs 4-digit)
+- **Entity-aware:** Correct format for each entity type (goals: 3-digit, others: 4-digit)
 - **Comprehensive detection:** Checks both filenames AND frontmatter
 - **Reusable:** Single script usable by all commands and agents
 
@@ -20,12 +21,14 @@ Generate unique, collision-free random IDs for SPECLAN entities with automatic r
 | Entity Type | Prefix | Digits | Range | Example |
 |-------------|--------|--------|-------|---------|
 | goal | G- | 3 | 100-999 | G-142 |
-| feature | F- | 3 | 100-999 | F-847 |
+| feature | F- | 4 | 1000-9999 | F-1847 |
 | requirement | R- | 4 | 1000-9999 | R-3928 |
 | change-request | CR- | 4 | 1000-9999 | CR-7291 |
 | scenario | S- | 4 | 1000-9999 | S-4521 |
 | acceptance-criterion | AC- | 4 | 1000-9999 | AC-2847 |
 | test | T- | 4 | 1000-9999 | T-1029 |
+
+**ID-Based Ordering:** IDs determine artifact priority numerically. Lower IDs = higher priority. When generating IDs for artifacts that should have specific priority relative to existing ones, consider the ID range carefully.
 
 ## Usage
 
@@ -55,7 +58,7 @@ ${PLUGIN_ROOT}/skills/speclan-id-generator/scripts/generate-id.sh
 ```bash
 # Generate a single feature ID
 ./generate-id.sh feature
-# Output: F-847
+# Output: F-1847
 
 # Generate 5 requirement IDs at once
 ./generate-id.sh requirement 5
@@ -69,9 +72,9 @@ ${PLUGIN_ROOT}/skills/speclan-id-generator/scripts/generate-id.sh
 # Generate 3 feature IDs with custom speclan path
 ./generate-id.sh feature 3 /path/to/project/speclan
 # Output:
-# F-142
-# F-893
-# F-467
+# F-1142
+# F-2893
+# F-5467
 
 # Generate a change request ID
 ./generate-id.sh change-request
@@ -110,10 +113,10 @@ The script implements a robust ID generation algorithm:
 1. Parse entity type to get prefix, digit count, and range
 2. For up to 100 attempts:
    a. Generate random number in range
-   b. Format as ID (e.g., F-293)
+   b. Format as ID (e.g., F-2934)
    c. Check for collisions:
-      - Search filenames: find speclan -name "F-293-*"
-      - Search frontmatter: grep "^id: F-293$"
+      - Search filenames: find speclan -name "F-2934-*"
+      - Search frontmatter: grep "^id: F-2934$"
    d. If no collision, return ID
 3. If all attempts fail, exit with error
 ```
@@ -122,16 +125,18 @@ The script implements a robust ID generation algorithm:
 
 The script checks two locations for collisions:
 
-### 1. Filename Collision
+### 1. Filename/Directory Collision
 
-Searches for files matching the ID pattern:
+Searches for files or directories matching the ID pattern:
 ```bash
 find "$speclan_dir" -name "${id}-*" -o -name "${id}.md"
 ```
 
-This catches:
-- `F-293-my-feature.md`
-- `R-4521-requirement.md`
+This catches both directory-based and flat file entities:
+- `F-2934-my-feature/` (feature directory)
+- `R-4521-requirement/` (requirement directory)
+- `G-142-goal.md` (flat goal file)
+- `CR-1234-change.md` (flat change request file)
 
 ### 2. Frontmatter Collision
 
@@ -149,14 +154,14 @@ This catches:
 If the script is not available, commands can use this inline algorithm:
 
 ```bash
-# Generate unique Feature ID
+# Generate unique Feature ID (4-digit)
 generate_feature_id() {
   local speclan_dir="${1:-speclan}"
   local max_attempts=100
 
   for attempt in $(seq 1 $max_attempts); do
-    # Generate random 3-digit number (100-999)
-    local num=$((RANDOM % 900 + 100))
+    # Generate random 4-digit number (1000-9999)
+    local num=$((RANDOM % 9000 + 1000))
     local id="F-${num}"
 
     # Check for collisions

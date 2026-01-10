@@ -61,9 +61,9 @@ owner: Store Owner
 created: '2025-12-29T09:51:56.458Z'
 updated: '2025-12-29'
 contributors:
-  - F-049
-  - F-247
-  - F-344
+  - F-1049
+  - F-2247
+  - F-3344
 metrics:
   - name: Inventory Management Efficiency
     target: 60% reduction in manual tasks
@@ -76,7 +76,7 @@ metrics:
 
 ---
 
-## Feature (F-###)
+## Feature (F-####)
 
 Capabilities that deliver value to users. Features form a hierarchical tree.
 
@@ -94,17 +94,17 @@ Features nest via directory structure:
 
 ```
 features/
-└── F-049-pet-management/           # Parent feature
-    ├── F-049-pet-management.md
-    └── F-200-pet-health/           # Child feature
-        └── F-200-pet-health.md
+└── F-1049-pet-management/          # Parent feature
+    ├── F-1049-pet-management.md
+    └── F-1200-pet-health/          # Child feature
+        └── F-1200-pet-health.md
 ```
 
 ### Example Feature
 
 ```yaml
 ---
-id: F-049
+id: F-1049
 type: feature
 title: Pet Management
 status: draft
@@ -123,6 +123,18 @@ goals:
 
 Specific conditions that must be satisfied by a feature.
 
+### Requirement Storage
+
+Requirements use **directory-based storage** (like features):
+
+```
+features/F-####-parent/requirements/
+└── R-2046-health-check/
+    ├── R-2046-health-check.md    # Requirement file
+    ├── change-requests/           # CRs for this requirement
+    └── scenarios/                 # Child scenarios
+```
+
 ### Requirement-Specific Fields
 
 | Field | Type | Required | Description |
@@ -134,14 +146,14 @@ Specific conditions that must be satisfied by a feature.
 
 ```yaml
 ---
-id: R-0001
+id: R-2046
 type: requirement
 title: Pets in quarantine or medical hold cannot be sold
 status: draft
 owner: Product Team
 created: "2025-12-29T08:09:34.064Z"
 updated: "2025-12-29T10:49:13.890Z"
-feature: F-009
+feature: F-1009
 scenarios:
   - S-0001
   - S-0002
@@ -341,13 +353,32 @@ changes: |
 | Entity | Pattern | Regex |
 |--------|---------|-------|
 | Goal | G-### | `^G-\d{3}$` |
-| Feature | F-### | `^F-\d{3}$` |
+| Feature | F-#### | `^F-\d{4}$` |
 | Requirement | R-#### | `^R-\d{4}$` |
 | Scenario | S-#### | `^S-\d{4}$` |
 | AcceptanceCriterion | AC-#### | `^AC-\d{4}$` |
 | Test | T-#### | `^T-\d{4}$` |
 | ChangeRequest | CR-#### | `^CR-\d{4}$` |
 | Template | UUID v4 | `^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$` |
+
+### ID-Based Ordering
+
+IDs determine artifact priority/order numerically within each entity type:
+
+| ID | Priority |
+|----|----------|
+| Lower numeric value | Higher priority (first) |
+| Higher numeric value | Lower priority (last) |
+
+**Examples:**
+- G-100 > G-500 > G-899 (goals sorted by ID)
+- F-1049 > F-2500 > F-9999 (features sorted by ID)
+- R-1000 > R-5000 > R-9500 (requirements sorted by ID)
+
+Use this ordering for:
+- Display order in tree views
+- Processing order in reports
+- Implementation priority suggestions
 
 ### Date Formats
 

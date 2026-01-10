@@ -26,7 +26,7 @@ Generate unique random ID(s) for SPECLAN entities.
 
 Entity types:
   goal                 G-### (3 digits, 100-999)
-  feature              F-### (3 digits, 100-999)
+  feature              F-#### (4 digits, 1000-9999)
   requirement          R-#### (4 digits, 1000-9999)
   change-request       CR-#### (4 digits, 1000-9999)
   scenario             S-#### (4 digits, 1000-9999)
@@ -58,7 +58,7 @@ get_entity_config() {
       echo "G-:3:100:999"
       ;;
     feature)
-      echo "F-:3:100:999"
+      echo "F-:4:1000:9999"
       ;;
     requirement)
       echo "R-:4:1000:9999"

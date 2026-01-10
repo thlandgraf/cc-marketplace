@@ -53,14 +53,20 @@ SPECLAN specifications use:
 ```
 speclan/
 ├── goals/G-###-name.md
-├── features/F-###-name/F-###-name.md
-└── requirements/R-####-name.md
+├── features/
+│   └── F-####-name/
+│       ├── F-####-name.md
+│       └── requirements/
+│           └── R-####-name/
+│               └── R-####-name.md
 ```
+
+Note: Features and Requirements use directory-based storage where directory name matches the contained markdown filename.
 
 **YAML frontmatter:**
 ```yaml
 ---
-id: F-001
+id: F-1001
 type: feature
 title: Core Extension
 status: draft
@@ -77,7 +83,7 @@ goals: [G-001]
 
 | Speckit Element | SPECLAN Entity |
 |-----------------|----------------|
-| Feature Branch | Feature (F-###) |
+| Feature Branch | Feature (F-####) |
 | FR-### | Requirement (R-####) |
 | Acceptance Scenario | Scenario (S-####) |
 | SC-### | AcceptanceCriterion (AC-####) |

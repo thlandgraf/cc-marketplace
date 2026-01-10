@@ -1,5 +1,5 @@
 ---
-name: implement
+name: speclan:implement
 description: Implement approved SPECLAN Features using feature-dev plugin
 allowed-tools:
   - Read

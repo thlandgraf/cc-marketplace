@@ -29,9 +29,9 @@ Given a list of features to implement (passed as input), analyze dependencies an
 You will receive input in this format:
 ```
 Features to order:
-- F-049-{slug}
-- F-200-{slug}
-- F-301-{slug}
+- F-1049-{slug}
+- F-1200-{slug}
+- F-1301-{slug}
 
 SPECLAN directory: speclan/
 ```
@@ -46,13 +46,13 @@ SPECLAN directory: speclan/
 
 Check if features are nested in the directory structure:
 ```bash
-# F-200 is child of F-049 if located at:
-speclan/features/F-049-*/F-200-*/F-200-*.md
+# F-1200 is child of F-1049 if located at:
+speclan/features/F-1049-*/F-1200-*/F-1200-*.md
 ```
 
 Or check `parent:` field in YAML frontmatter:
 ```yaml
-parent: F-049
+parent: F-1049
 ```
 
 **If parent and child are BOTH in input list → parent MUST come first.**
@@ -63,7 +63,7 @@ parent: F-049
 
 ```bash
 # Read feature spec
-cat speclan/features/F-XXX-*/F-XXX-*.md
+cat speclan/features/F-XXXX-*/F-XXXX-*.md
 ```
 
 Extract dependency indicators from:
@@ -72,11 +72,11 @@ Extract dependency indicators from:
 ```yaml
 # Explicit dependencies
 depends-on:
-  - F-049
+  - F-1049
   - F-100
 
 # Parent feature (implicit dependency)
-parent: F-049
+parent: F-1049
 
 # Required goals (shared dependencies)
 goals:
@@ -84,9 +84,9 @@ goals:
 ```
 
 **Markdown Content:**
-- "Depends on F-XXX" mentions
-- "Requires F-XXX" references
-- "After F-XXX is implemented" notes
+- "Depends on F-XXXX" mentions
+- "Requires F-XXXX" references
+- "After F-XXXX is implemented" notes
 - Cross-references in Related sections
 
 ### 3. Analyze Requirement Dependencies
@@ -94,8 +94,8 @@ goals:
 For each feature's requirements:
 
 ```bash
-# Find requirements for feature
-grep -r "^feature: F-XXX" speclan/requirements/ -l
+# Find requirements for feature (directory-based storage)
+find speclan/features/F-XXXX-*/requirements -type d -name 'R-*' 2>/dev/null
 ```
 
 Check requirement dependencies:
@@ -115,7 +115,7 @@ Analyze existing implementation for implicit dependencies:
 **Import/Module Dependencies:**
 ```bash
 # Find files related to feature
-grep -r "F-XXX\|feature-name" src/ --include="*.ts" -l
+grep -r "F-XXXX\|feature-name" src/ --include="*.ts" -l
 
 # Check imports in those files
 grep -E "^import.*from" <files>
@@ -137,10 +137,10 @@ Create adjacency list representation:
 ```
 Graph Structure:
 {
-  "F-049": [],                    # No dependencies (root)
-  "F-200": ["F-049"],             # Depends on F-049 (child of F-049)
-  "F-301": ["F-049", "F-200"],    # Depends on both
-  "F-150": ["F-049"]              # Depends on F-049
+  "F-1049": [],                    # No dependencies (root)
+  "F-1200": ["F-1049"],             # Depends on F-1049 (child of F-1049)
+  "F-1301": ["F-1049", "F-1200"],    # Depends on both
+  "F-1150": ["F-1049"]              # Depends on F-1049
 }
 ```
 
@@ -151,9 +151,9 @@ When a feature and its subfeatures are both in the input list:
 - Subfeatures inherit an implicit dependency on their parent
 - This is non-negotiable regardless of other dependency analysis
 
-Example: If input contains F-049 and F-200 (child of F-049):
+Example: If input contains F-1049 and F-1200 (child of F-1049):
 ```
-F-049 → F-200  (parent-child relationship = mandatory ordering)
+F-1049 → F-1200  (parent-child relationship = mandatory ordering)
 ```
 
 **Dependency Types (weighted):**
@@ -176,11 +176,11 @@ If cycle detected:
 ```
 ## ⚠️ Circular Dependency Detected
 
-Cycle: F-049 → F-200 → F-301 → F-049
+Cycle: F-1049 → F-1200 → F-1301 → F-1049
 
 Resolution options:
-1. Break cycle by implementing F-XXX first (minimal shared state)
-2. Merge features F-XXX and F-YYY
+1. Break cycle by implementing F-XXXX first (minimal shared state)
+2. Merge features F-XXXX and F-YYYY
 3. Extract shared functionality to new feature
 
 Proceeding with best-effort ordering...
@@ -193,13 +193,21 @@ Algorithm:
 1. Calculate in-degree for each node
 2. Add nodes with in-degree 0 to queue
 3. While queue not empty:
-   - Remove node from queue
+   - Remove node from queue (use ID-based ordering for ties)
    - Add to result list
    - For each neighbor:
      - Decrement in-degree
      - If in-degree becomes 0, add to queue
 4. If result size ≠ node count → cycle exists
 ```
+
+**Tiebreaker: ID-Based Ordering**
+
+When multiple features have the same dependency level (same in-degree), use numeric ID ordering:
+- **Lower IDs = Higher priority** (implemented first)
+- **Higher IDs = Lower priority** (implemented later)
+
+Example: If F-1049 and F-2500 both have no dependencies, F-1049 is implemented first.
 
 ## Output Format
 
@@ -212,43 +220,43 @@ Return structured implementation order:
 
 ```mermaid
 graph TD
-    F-049[F-049: Pet Management] --> F-200[F-200: Pet Health]
-    F-049 --> F-150[F-150: Pet Sales]
-    F-200 --> F-301[F-301: Health Reports]
+    F-1049[F-1049: Pet Management] --> F-1200[F-1200: Pet Health]
+    F-1049 --> F-1150[F-1150: Pet Sales]
+    F-1200 --> F-1301[F-1301: Health Reports]
 ```
 
 ### Implementation Sequence
 
 | Order | Feature | Title | Dependencies | Reason |
 |-------|---------|-------|--------------|--------|
-| 1 | F-049 | Pet Management | None | Root feature, no dependencies |
-| 2 | F-150 | Pet Sales | F-049 | Requires pet entities from F-049 |
-| 3 | F-200 | Pet Health | F-049 | Requires pet entities from F-049 |
-| 4 | F-301 | Health Reports | F-200 | Requires health records from F-200 |
+| 1 | F-1049 | Pet Management | None | Root feature, no dependencies |
+| 2 | F-1150 | Pet Sales | F-1049 | Requires pet entities from F-1049 |
+| 3 | F-1200 | Pet Health | F-1049 | Requires pet entities from F-1049 |
+| 4 | F-1301 | Health Reports | F-1200 | Requires health records from F-1200 |
 
 ### Dependency Details
 
-**F-049: Pet Management**
+**F-1049: Pet Management**
 - Dependencies: None
-- Dependents: F-150, F-200
+- Dependents: F-1150, F-1200
 - Analysis: Core pet entity definitions, must be first
 
-**F-200: Pet Health**
-- Dependencies: F-049 (explicit in YAML)
-- Dependents: F-301
+**F-1200: Pet Health**
+- Dependencies: F-1049 (explicit in YAML)
+- Dependents: F-1301
 - Analysis: Extends Pet entity with health tracking
 
-**F-301: Health Reports**
-- Dependencies: F-200 (implicit from requirements)
+**F-1301: Health Reports**
+- Dependencies: F-1200 (implicit from requirements)
 - Dependents: None
 - Analysis: Consumes health data, implement last
 
 ### Parallel Implementation Opportunities
 
 Features at same depth level can be implemented in parallel:
-- Level 1: F-049
-- Level 2: F-150, F-200 (parallel possible)
-- Level 3: F-301
+- Level 1: F-1049
+- Level 2: F-1150, F-1200 (parallel possible)
+- Level 3: F-1301
 ```
 
 ## Edge Cases
@@ -271,20 +279,20 @@ When some features already implemented:
 ## Existing Implementation Analysis
 
 Already implemented (excluded from ordering):
-- F-049: Pet Management ✓
+- F-1049: Pet Management ✓
 
 Remaining features to implement:
 | Order | Feature | Dependencies |
 |-------|---------|--------------|
-| 1 | F-200 | F-049 (✓ satisfied) |
-| 2 | F-301 | F-200 |
+| 1 | F-1200 | F-1049 (✓ satisfied) |
+| 2 | F-1301 | F-1200 |
 ```
 
 ### Single Feature
 
 If only one feature provided:
 ```
-Single feature F-XXX - no ordering needed.
+Single feature F-XXXX - no ordering needed.
 Dependencies check: All satisfied ✓
 ```
 
@@ -297,7 +305,7 @@ find speclan/features -name "F-*.md" -type f
 
 **Extract depends-on:**
 ```bash
-grep -A5 "^depends-on:" speclan/features/F-XXX-*/F-XXX-*.md
+grep -A5 "^depends-on:" speclan/features/F-XXXX-*/F-XXXX-*.md
 ```
 
 **Find parent features:**
