@@ -1,0 +1,13 @@
+{
+  "name": "constitution",
+  "version": "0.1.0",
+  "description": "Manage project constitution files - rules, best practices, patterns, and guardrails for LLM/coding agents",
+  "author": {
+    "name": "Thomas Landgraf",
+    "email": "tl@digital-dividend.de"
+  },
+  "license": "MIT",
+  "keywords": ["constitution", "rules", "best-practices", "guardrails", "patterns"],
+  "commands": "./commands/",
+  "skills": "./skills/"
+}
