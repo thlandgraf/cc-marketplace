@@ -277,14 +277,68 @@ If `--dry-run` flag provided:
 
 For each user-selected change:
 
+#### ID Generation (MUST USE)
+
+**DO NOT create your own ID generator.** Use this collision-safe algorithm:
+
+```bash
+# Generate unique Feature ID (4-digit, F-1000 to F-9999)
+generate_feature_id() {
+  local speclan_dir="${1:-speclan}"
+  for attempt in $(seq 1 100); do
+    local num=$((RANDOM % 9000 + 1000))
+    local id="F-${num}"
+    if [ ! -d "$speclan_dir" ] || \
+       (! find "$speclan_dir" -name "${id}-*" 2>/dev/null | grep -q . && \
+        ! grep -r "^id: ${id}$" "$speclan_dir" 2>/dev/null | grep -q .); then
+      echo "$id"
+      return 0
+    fi
+  done
+  echo "ERROR: Could not generate unique ID" >&2
+  return 1
+}
+
+# Generate unique Requirement ID (4-digit, R-1000 to R-9999)
+generate_requirement_id() {
+  local speclan_dir="${1:-speclan}"
+  for attempt in $(seq 1 100); do
+    local num=$((RANDOM % 9000 + 1000))
+    local id="R-${num}"
+    if [ ! -d "$speclan_dir" ] || \
+       (! find "$speclan_dir" -name "${id}-*" 2>/dev/null | grep -q . && \
+        ! grep -r "^id: ${id}$" "$speclan_dir" 2>/dev/null | grep -q .); then
+      echo "$id"
+      return 0
+    fi
+  done
+  echo "ERROR: Could not generate unique ID" >&2
+  return 1
+}
+
+# Generate unique Change Request ID (4-digit, CR-1000 to CR-9999)
+generate_cr_id() {
+  local speclan_dir="${1:-speclan}"
+  for attempt in $(seq 1 100); do
+    local num=$((RANDOM % 9000 + 1000))
+    local id="CR-${num}"
+    if [ ! -d "$speclan_dir" ] || \
+       (! find "$speclan_dir" -name "${id}-*" 2>/dev/null | grep -q . && \
+        ! grep -r "^id: ${id}$" "$speclan_dir" 2>/dev/null | grep -q .); then
+      echo "$id"
+      return 0
+    fi
+  done
+  echo "ERROR: Could not generate unique ID" >&2
+  return 1
+}
+```
+
 #### 9.1 Create New Features
 
 1. Generate feature ID and get owner:
    ```bash
-   # Use ID generator skill
-   FEATURE_ID=$("${PLUGIN_ROOT}/skills/speclan-id-generator/scripts/generate-id.sh" feature speclan)
-
-   # Get owner from git config
+   FEATURE_ID=$(generate_feature_id speclan)
    OWNER=$(git config --get user.email)
    ```
 
@@ -336,7 +390,7 @@ For locked features or requirements:
 
 1. Generate CR ID:
    ```bash
-   CR_ID=$("${PLUGIN_ROOT}/skills/speclan-id-generator/scripts/generate-id.sh" change-request speclan)
+   CR_ID=$(generate_cr_id speclan)
    ```
 
 2. Create CR in entity's change-requests directory:
@@ -352,14 +406,18 @@ For locked features or requirements:
 
 #### 9.4 Create New Requirements
 
-1. Generate requirement ID
+1. Generate requirement ID:
+   ```bash
+   REQ_ID=$(generate_requirement_id speclan)
+   SLUG=$(echo "[title]" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-')
+   ```
 2. Create requirement directory:
    ```bash
-   mkdir -p "speclan/features/[feature-dir]/requirements/R-####-slug"
+   mkdir -p "speclan/features/[feature-dir]/requirements/${REQ_ID}-${SLUG}"
    ```
 3. Write requirement file to directory:
    ```
-   speclan/features/[feature-dir]/requirements/R-####-slug/R-####-slug.md
+   speclan/features/[feature-dir]/requirements/${REQ_ID}-${SLUG}/${REQ_ID}-${SLUG}.md
    ```
 4. Update parent feature's `updated` timestamp
 
