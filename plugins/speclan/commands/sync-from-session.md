@@ -17,6 +17,32 @@ argument-hint: "[--dry-run] [hints...]"
 
 Analyze the current session to identify implemented features and sync them to SPECLAN specifications.
 
+## Core Philosophy: Implementation Reveals Specification Gaps
+
+**Specifications written before implementation are incomplete by nature.** Real implementation work exposes:
+
+- **Missing requirements** - Edge cases, error handling, validation rules discovered during coding
+- **Implicit assumptions** - Behaviors that were obvious to implement but never documented
+- **Integration points** - Dependencies and interactions only visible when building
+- **User experience details** - UI flows, feedback mechanisms, accessibility considerations
+
+**This command treats implementation as the source of truth.** When code does something useful that isn't in the spec, the spec is incomplete - not the code.
+
+### When to Add Requirements
+
+Add new requirements when implementation reveals:
+
+| Implementation Pattern | Likely Missing Requirement |
+|------------------------|---------------------------|
+| Error handling/validation | Input validation rules, error messages |
+| Retry logic, timeouts | Reliability/resilience requirements |
+| Caching, optimization | Performance requirements |
+| Logging, metrics | Observability requirements |
+| Permission checks | Authorization requirements |
+| Edge case handling | Boundary condition requirements |
+| Default values | Configuration/defaults requirements |
+| User feedback (toasts, spinners) | UX feedback requirements |
+
 ## Instructions
 
 ### 1. Parse Arguments
@@ -90,7 +116,32 @@ For each identified change, determine:
 - **Code paths**: Files involved
 - **Type**: new feature, enhancement, or bugfix
 
-#### 3.3 Group Related Changes
+#### 3.3 Infer Requirements from Implementation
+
+**Critical step:** Analyze implemented code to discover undocumented requirements:
+
+```
+For each code change, ask:
+1. What user-visible behavior does this enable?
+2. What edge cases does this handle?
+3. What validation/error handling was added?
+4. What performance/reliability concerns does this address?
+5. What dependencies or integrations does this require?
+```
+
+**Example inference:**
+```
+Code: if (retries > 3) throw new Error('Max retries exceeded')
+Inferred requirement: "System shall retry failed operations up to 3 times before failing"
+
+Code: toast.success('Changes saved')
+Inferred requirement: "System shall provide visual feedback when changes are saved"
+
+Code: if (!user.hasPermission('admin')) return 403
+Inferred requirement: "Only administrators can access this functionality"
+```
+
+#### 3.4 Group Related Changes
 
 Consolidate related changes:
 - Multiple files for one feature = single feature entry
@@ -113,17 +164,30 @@ If no speclan directory exists, ask user if they want to initialize one.
 
 ### 5. Index Existing Specs
 
-If speclan exists, build an index of current specs:
+If speclan exists, use the SPECLAN Query skill to build an index:
 
 ```bash
-# List features with status
-for f in $(find speclan/features -name "F-*.md" -type f 2>/dev/null); do
-  id=$(grep "^id:" "$f" | head -1 | sed 's/id: *//')
-  title=$(grep "^title:" "$f" | head -1 | sed 's/title: *//')
-  status=$(grep "^status:" "$f" | head -1 | sed 's/status: *//')
-  echo "$id|$title|$status|$f"
-done
+# List all features with full metadata (JSON output)
+"${PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" --type feature --full speclan
+
+# List requirements for a specific feature
+"${PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" --type requirement --parent F-1234 --full speclan
+
+# Filter by status (e.g., find editable features)
+"${PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" --type feature --filter-status draft --full speclan
 ```
+
+**Output format (JSON):**
+```json
+[
+  {"id":"F-1234","slug":"my-feature","type":"feature","path":"speclan/features/F-1234-my-feature/F-1234-my-feature.md","title":"My Feature","status":"draft"}
+]
+```
+
+Use this to:
+1. Find features that match session work
+2. Determine if features are editable or locked
+3. Identify where to add new requirements
 
 ### 6. Compare and Classify Changes
 
@@ -134,10 +198,33 @@ For each feature candidate from session analysis:
 | No match in speclan | CREATE | New feature spec |
 | Matches existing, status editable | UPDATE | Modify existing spec |
 | Matches existing, status locked | CHANGE_REQUEST | Create CR |
-| Small enhancement to existing | ADD_REQUIREMENT | New requirement |
+| Implementation detail of existing feature | ADD_REQUIREMENT | New requirement |
 
 **Editable statuses:** draft, review, approved
 **Locked statuses:** in-development, under-test, released, deprecated
+
+#### 6.1 Prioritize Requirement Discovery
+
+**Most syncs should produce new requirements, not just feature updates.**
+
+When analyzing implementation against existing specs:
+
+1. **Read the existing feature spec thoroughly**
+2. **Compare each implemented behavior against documented scope**
+3. **For each undocumented behavior, create a requirement**
+
+```
+Existing spec says: "Users can save their preferences"
+Implementation adds: retry logic, validation, success toast, error handling
+
+→ Add requirements:
+  - R-####: "Preference saves shall retry up to 3 times on failure"
+  - R-####: "Invalid preference values shall show validation error"
+  - R-####: "Successful save shall display confirmation message"
+  - R-####: "Failed save shall display actionable error message"
+```
+
+**Rule of thumb:** If you wrote more than 20 lines of code for a feature, there's probably at least one missing requirement.
 
 ### 7. Present Changes to User
 
