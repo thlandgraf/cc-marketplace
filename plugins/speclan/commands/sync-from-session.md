@@ -279,10 +279,13 @@ For each user-selected change:
 
 #### 9.1 Create New Features
 
-1. Generate feature ID:
+1. Generate feature ID and get owner:
    ```bash
    # Use ID generator skill
    FEATURE_ID=$("${PLUGIN_ROOT}/skills/speclan-id-generator/scripts/generate-id.sh" feature speclan)
+
+   # Get owner from git config
+   OWNER=$(git config --get user.email)
    ```
 
 2. Create directory and file:
@@ -298,7 +301,7 @@ For each user-selected change:
    type: feature
    title: [Title]
    status: under-test
-   owner: Developer
+   owner: [OWNER from git config --get user.email]
    created: "[ISO-8601]"
    updated: "[ISO-8601]"
    goals: []
