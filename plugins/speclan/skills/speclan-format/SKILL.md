@@ -1,23 +1,51 @@
 ---
 name: SPECLAN Format
 description: >-
-  This skill should be used when the user works with SPECLAN specification files or performs CRUD operations on specs.
+  **ALWAYS INJECT** this skill when working with files in PROJECTROOT/speclan/ directory.
 
-  **Read operations:** "read feature", "list requirements", "show goals", "view change-request", "get subfeature", "find spec", "search requirements", "display scenarios"
+  This is foundational knowledge for ALL speclan operations - reading, creating, updating, or deleting spec files. Without this context, Claude will create incorrect file structures, invalid IDs, or broken relationships.
 
-  **Create operations:** "create feature", "new requirement", "add goal", "write change-request", "add scenario", "new spec", "create specification"
-
-  **Update operations:** "update feature", "modify requirement", "edit goal", "change specification", "update spec status", "revise requirement"
-
-  **Delete operations:** "delete change-request", "remove requirement", "deprecate feature"
-
-  Also triggers on: "speclan directory", "YAML frontmatter for specs", "spec hierarchy", "entity validation", "spec structure", "ID format", "parent-child relationship", "status lifecycle", or needs guidance on SPECLAN file format, entity types (Goal, Feature, Requirement, Scenario, ChangeRequest, AcceptanceCriterion, Test), ID conventions (G-###, F-####, R-####, CR-####, S-####), validation rules, or specification writing best practices.
-version: 0.1.0
+  Triggers: ANY operation on speclan/ files, "read feature", "list requirements", "create feature", "new requirement", "update spec", "delete change-request", "speclan directory", "spec hierarchy", "ID format", or any mention of SPECLAN entity types (Goal, Feature, Requirement, Scenario, ChangeRequest).
+version: 0.2.0
 ---
 
 # SPECLAN Format Knowledge
 
+**THIS IS FOUNDATIONAL CONTEXT.** Apply these rules to ALL speclan file operations.
+
 SPECLAN (Specification as a Living Language) manages project specifications as interlinked markdown files with YAML frontmatter in a hierarchical directory structure.
+
+## Quick Reference (CRITICAL)
+
+### Filename IS the Source of Truth
+
+The **directory/filename pattern** `{PREFIX}-{ID}-{slug}` is authoritative:
+
+```
+F-1049-pet-management/F-1049-pet-management.md
+│  │    │              └─ File MUST match directory name
+│  │    └─ Kebab-case slug from title
+│  └─ 4-digit numeric ID (randomly generated)
+└─ Entity prefix (F=Feature, R=Requirement, etc.)
+```
+
+**Extract ID from filename, NOT frontmatter** for indexing and collision checks.
+
+### Entity Prefixes
+
+| Entity | Prefix | Digits | Example | Storage |
+|--------|--------|--------|---------|---------|
+| Goal | G- | 3 | G-292 | `goals/G-292-slug.md` (flat) |
+| Feature | F- | 4 | F-1049 | `features/F-1049-slug/F-1049-slug.md` (dir) |
+| Requirement | R- | 4 | R-2046 | `features/.../requirements/R-2046-slug/R-2046-slug.md` (dir) |
+| Change Request | CR- | 4 | CR-0731 | `{parent}/change-requests/CR-0731-slug.md` (flat) |
+| Scenario | S- | 4 | S-0001 | `requirements/.../scenarios/S-0001-slug/` (dir) |
+
+### Status Determines Editability
+
+| Editable (direct edit OK) | Locked (needs Change Request) |
+|---------------------------|------------------------------|
+| draft, review, approved | in-development, under-test, released, deprecated |
 
 ## Directory Structure
 
