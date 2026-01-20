@@ -1,6 +1,6 @@
 {
   "name": "speclan",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Claude Code helper for SPECLAN - manage project specifications as interlinked markdown files",
   "author": {
     "name": "Thomas Landgraf",

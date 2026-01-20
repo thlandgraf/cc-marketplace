@@ -1,5 +1,5 @@
 {
-  "description": "SPECLAN plugin hooks for context detection",
+  "description": "SPECLAN plugin hooks for context detection and skill injection",
   "hooks": {
     "SessionStart": [
       {
@@ -9,6 +9,18 @@
             "type": "command",
             "command": "bash $CLAUDE_PLUGIN_ROOT/hooks/scripts/detect-context.sh",
             "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Read|Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PLUGIN_ROOT/hooks/scripts/inject-skill.sh",
+            "timeout": 5
           }
         ]
       }
