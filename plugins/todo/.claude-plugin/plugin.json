@@ -1,0 +1,19 @@
+{
+  "name": "todo",
+  "version": "0.1.0",
+  "description": "Filesystem-based task management with git integration - track tasks through open/wip/done lifecycle",
+  "author": {
+    "name": "Thomas Landgraf",
+    "email": "tl@digital-dividend.de"
+  },
+  "license": "MIT",
+  "keywords": [
+    "todo",
+    "tasks",
+    "project-management",
+    "git",
+    "workflow"
+  ],
+  "commands": "./commands/",
+  "skills": "./skills/"
+}
