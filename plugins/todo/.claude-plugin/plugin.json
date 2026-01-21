@@ -1,6 +1,6 @@
 {
   "name": "todo",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Filesystem-based task management with git integration - track tasks through open/wip/done lifecycle",
   "author": {
     "name": "Thomas Landgraf",

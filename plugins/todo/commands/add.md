@@ -46,22 +46,72 @@ From the ARGUMENT, extract:
 Generate slug from title: lowercase, spaces to hyphens, remove special chars.
 Example: "Fix login bug in auth module" → `fix-login-bug-in-auth-module`
 
-### 4. Ask Clarifying Questions
+### 4. Search for Related Tasks (BEFORE asking questions)
 
-Use AskUserQuestion to gather:
+**Only suggest dependencies if there's actual similarity.**
 
-| Question | Options |
-|----------|---------|
-| Priority | high, medium, low |
-| Any dependencies? | Let user type task IDs or "none" |
+1. Extract keywords from new task title (ignore stop words like "the", "a", "fix", "add", "update")
+2. Search existing open/wip tasks for keyword matches:
+   ```bash
+   # Get keywords from title
+   keywords=$(echo "<title>" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' ' ')
 
-### 5. Search for Related Context
+   # Search each keyword in existing tasks
+   for kw in $keywords; do
+     grep -ril "$kw" todo/open/ todo/wip/ 2>/dev/null
+   done | sort | uniq -c | sort -rn
+   ```
 
-Use Grep to find related code or existing tasks:
+3. **Only consider tasks as related if they match 2+ keywords OR share the same component/module**
+
+4. Build related_tasks list with:
+   - Task ID
+   - Title (from first heading)
+   - Match reason (which keywords matched)
+
+### 5. Ask Clarifying Questions
+
+Use AskUserQuestion with **multiSelect: true** for dependencies:
+
+```yaml
+questions:
+  - question: "What priority should this task have?"
+    header: "Priority"
+    multiSelect: false
+    options:
+      - label: "High"
+        description: "Urgent, blocks other work"
+      - label: "Medium (Recommended)"
+        description: "Normal priority"
+      - label: "Low"
+        description: "Nice to have, not urgent"
+
+  # ONLY show this question if related_tasks is NOT empty
+  - question: "Any dependencies on other tasks?"
+    header: "Dependencies"
+    multiSelect: true  # Allow selecting multiple dependencies
+    options:
+      - label: "None"
+        description: "No dependencies, can start immediately"
+      # Add ONLY tasks from related_tasks list:
+      - label: "Task <ID>"
+        description: "<title> (matched: <keywords>)"
+      # ... more related tasks
+```
+
+**IMPORTANT:**
+- Do NOT show dependency question if no related tasks found
+- Do NOT suggest ALL existing tasks - only those with keyword/topic similarity
+- Always include "None" as first option
+- Show max 4 related tasks (most relevant first)
+
+### 6. Search for Related Code Context
+
+Use Grep to find related code (for populating the Tasks section):
 - Search codebase for keywords from the title
-- Check existing tasks for potential dependencies
+- Identify files/modules that might need changes
 
-### 6. Create Task File
+### 7. Create Task File
 
 Create file at `todo/open/<ID>-<slug>.md`:
 
@@ -89,7 +139,7 @@ Create file at `todo/open/<ID>-<slug>.md`:
 <!-- Auto-populated by /todo:update -->
 ```
 
-### 7. Report Result
+### 8. Report Result
 
 Output confirmation:
 ```
