@@ -1,54 +1,90 @@
 # Digital Dividend Plugin Marketplace
 
-A Claude Code plugin marketplace by Digital Dividend.
+Claude Code plugins for specification-driven development, project governance, and task management.
 
 ## Plugins
 
 ### SPECLAN
 
-Claude Code helper for the [SPECLAN](https://github.com/digital-dividend/speclan) VSCode extension - enabling teams to manage project specifications as interlinked markdown files.
+Claude Code helper for the [SPECLAN](https://github.com/digital-dividend/speclan) VSCode extension - manage project specifications as interlinked markdown files.
 
-#### Features
+#### Capabilities
 
-| Capability | Description |
-|------------|-------------|
+| Flow | Description |
+|------|-------------|
 | **Impl → Spec** | Sync session work to SPECLAN specifications |
+| **Spec → Impl** | Implement approved features using feature-dev |
 | **Speckit → Speclan** | Convert speckit specifications to SPECLAN format |
-| **Speclan → Speckit** | Inject SPECLAN specs into speckit commands |
-| **Speclan → Impl** | Implement from SPECLAN specifications using feature-dev |
+| **Speclan → Speckit** | Inject approved SPECLAN specs into speckit commands |
 
 #### Commands
 
 | Command | Description |
 |---------|-------------|
 | `/speclan:status` | Check project setup, installed plugins, and spec statistics |
-| `/speclan:sync-from-session` | Sync session work to SPECLAN specs - identifies implemented features |
+| `/speclan:sync` | Sync session work to SPECLAN specs - identifies implemented features |
+| `/speclan:implement` | Implement approved Features using feature-dev |
 | `/speclan:from-speckit` | Convert speckit specs to SPECLAN format |
 | `/speclan:to-speckit` | Inject approved SPECLAN Features into speckit |
-| `/speclan:implement` | Implement approved Features using feature-dev |
 
-#### SPECLAN Format
+#### Agents
 
-SPECLAN manages specifications as markdown files with YAML frontmatter in a hierarchical directory:
+| Agent | Description |
+|-------|-------------|
+| `feature-verifier` | Deep 5-layer verification of feature implementation against specs |
+| `requirement-verifier` | Verify individual requirements are satisfied by code |
+| `implementation-order` | Analyze feature dependencies and determine optimal build order |
+| `spec-converter` | Bidirectional conversion between speckit and SPECLAN formats |
 
-```
-speclan/
-├── goals/           # G-### Strategic goals
-├── features/        # F-### Feature tree (hierarchical)
-├── requirements/    # R-#### Requirements
-└── templates/       # Specification templates
-```
+#### Skills
+
+| Skill | Description |
+|-------|-------------|
+| `speclan-format` | Foundational knowledge for all speclan/ file operations |
+| `speclan-query` | Query specs by type, status, or parent relationship (JSON output) |
+| `speclan-id-generator` | Collision-free random ID generation for SPECLAN entities |
+| `sync-from-session` | Workflow for capturing session work as SPECLAN specs |
+
+#### Hooks
+
+| Event | Behavior |
+|-------|----------|
+| `SessionStart` | Detects speclan/ directory, counts specs, checks plugin dependencies |
+| `PreToolUse` (Read/Write/Edit) | Auto-injects SPECLAN format knowledge when accessing spec files |
+| `PreToolUse` (Write/Edit) | Guards locked specs - blocks direct edits to in-development/released/deprecated entities |
 
 #### Entity Hierarchy
 
 ```
 Goal (G-###)
-  └── Feature (F-###)  [tree structure]
-        └── Requirement (R-####)
-              └── Scenario (S-####)
-                    └── AcceptanceCriterion (AC-####)
-                          └── Test (T-####)
+  └── Feature (F-####)  [tree structure, directory-based]
+        └── Requirement (R-####)  [directory-based, acceptance criteria inline]
 ```
+
+Plus: ChangeRequest (CR-####) for modifying locked entities, Template (UUID) for spec scaffolding.
+
+#### Directory Structure
+
+```
+speclan/
+├── goals/           # G-### Strategic goals (flat files)
+├── features/        # F-#### Feature tree (hierarchical directories)
+│   └── F-1234-my-feature/
+│       ├── F-1234-my-feature.md
+│       ├── requirements/
+│       │   └── R-5678-some-req/
+│       └── change-requests/
+├── requirements/    # R-#### Top-level requirements
+└── templates/       # Specification templates
+```
+
+#### Status Lifecycle
+
+```
+draft → review → approved → in-development → under-test → released → deprecated
+```
+
+Specs in `draft`, `review`, `approved` are directly editable. Locked statuses (`in-development`, `under-test`, `released`) require a Change Request. `deprecated` is permanently frozen.
 
 ---
 
@@ -79,9 +115,7 @@ Filesystem-based task management with git integration - track tasks through open
 | `/todo:update` | Log implementation progress - auto-detect work from git diff |
 | `/todo:done` | Mark a task as complete - move to done, finalize log |
 
-#### Todo Format
-
-Tasks are stored as markdown files that move through directories:
+#### Directory Structure
 
 ```
 todo/
@@ -100,43 +134,16 @@ todo/
 
 | Plugin | Requires |
 |--------|----------|
-| speclan | SPECLAN directory (`${PROJECT}/speclan/`) |
+| speclan | SPECLAN directory (`speclan/`) |
 | constitution | Constitution file (`constitution.md`) - created automatically |
 | todo | Todo directory (`todo/`) - created automatically |
 
 ### Optional Dependencies
 
-- **speckit plugin** - Required for `/speclan:from-speckit` and `/speclan:to-speckit` commands
-- **feature-dev plugin** - Required for `/speclan:implement` command
-
-## Installation
-
-### Add the Marketplace
-
-```bash
-claude marketplace add digital-dividend/speclan-plugin
-```
-
-### Install Plugins
-
-```bash
-# Install SPECLAN plugin
-claude plugin install speclan
-
-# Install Constitution plugin
-claude plugin install constitution
-
-# Install Todo plugin
-claude plugin install todo
-```
-
-Or install directly from the repo:
-
-```bash
-claude plugin install github:digital-dividend/speclan-plugin/plugins/speclan
-claude plugin install github:digital-dividend/speclan-plugin/plugins/constitution
-claude plugin install github:digital-dividend/speclan-plugin/plugins/todo
-```
+| Dependency | Required By |
+|------------|-------------|
+| **feature-dev plugin** | `/speclan:implement` |
+| **speckit plugin** | `/speclan:from-speckit`, `/speclan:to-speckit` |
 
 ## License
 

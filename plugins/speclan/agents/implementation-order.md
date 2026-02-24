@@ -1,12 +1,35 @@
 ---
 name: implementation-order
 color: blue
-description: |
-  Use this agent when:
-  <example>User needs to determine optimal feature implementation order</example>
-  <example>Analyzing feature dependencies for implementation planning</example>
-  <example>Creating a dependency graph for SPECLAN features</example>
-  <example>Sorting features by dependencies before implementation</example>
+model: sonnet
+description: Use this agent when the user needs to determine optimal feature implementation order, analyze feature dependencies, or create a dependency graph. Examples:
+
+  <example>
+  Context: User needs to determine optimal feature implementation order
+  user: "What order should I implement these features?"
+  assistant: "I'll use the implementation-order agent to analyze dependencies."
+  <commentary>
+  User requesting implementation ordering, trigger implementation-order agent.
+  </commentary>
+  </example>
+
+  <example>
+  Context: Analyzing feature dependencies for implementation planning
+  user: "Show me the dependency graph for approved features"
+  assistant: "I'll use the implementation-order agent to build the dependency graph."
+  <commentary>
+  Dependency analysis request triggers the agent.
+  </commentary>
+  </example>
+
+  <example>
+  Context: Sorting features by dependencies before implementation
+  user: "Sort these features by their dependencies"
+  assistant: "I'll use the implementation-order agent to perform topological sort."
+  <commentary>
+  Feature sorting request triggers the agent.
+  </commentary>
+  </example>
 tools:
   - Read
   - Glob
@@ -73,7 +96,7 @@ Extract dependency indicators from:
 # Explicit dependencies
 depends-on:
   - F-1049
-  - F-100
+  - F-1000
 
 # Parent feature (implicit dependency)
 parent: F-1049
@@ -315,7 +338,7 @@ grep "^parent:" speclan/features/*/F-*.md
 
 **Cross-reference mentions:**
 ```bash
-grep -r "F-[0-9]\{3\}" speclan/features/ --include="*.md"
+grep -r "F-[0-9]\{4\}" speclan/features/ --include="*.md"
 ```
 
 ## Confidence Levels

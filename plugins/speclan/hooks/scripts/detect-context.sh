@@ -6,12 +6,6 @@
 
 # Minimal error handling - hooks must not fail on "not found" conditions
 
-# Colors for output
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-RED='\033[0;31m'
-NC='\033[0m' # No Color
-
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 
 # --- Detection Functions ---
@@ -170,14 +164,12 @@ if [[ -n "${CLAUDE_ENV_FILE:-}" ]]; then
     echo -e "$env_output" >> "$CLAUDE_ENV_FILE"
 fi
 
-# Output context for Claude
-echo -e "$output"
-
-# Return JSON for systemMessage
+# Output context for Claude as systemMessage JSON
+json_output=$(echo -e "$output" | jq -Rs . 2>/dev/null || echo '"SPECLAN context detection completed."')
 cat << EOF
 {
   "continue": true,
   "suppressOutput": false,
-  "systemMessage": "SPECLAN context loaded. Speclan dir: ${speclan_dir:-none}. Use /speclan:status for details."
+  "systemMessage": ${json_output}
 }
 EOF

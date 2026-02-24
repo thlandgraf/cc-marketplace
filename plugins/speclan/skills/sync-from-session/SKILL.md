@@ -178,7 +178,7 @@ Based on our session, I identified the following potential spec updates:
 1. For **F-1142**: Validate file format on import
 ```
 
-**IMPORTANT:** Descriptions shown to users must be implementation and architecture agnostic. Focus on WHAT the feature does for users, not HOW it's implemented or structured (no mention of JWT, CSV, file paths, libraries, design patterns, architectural decisions, etc.).
+**IMPORTANT:** Keep descriptions implementation-agnostic (see `references/implementation-agnostic-guidelines.md`).
 
 ### 4.2 Ask for User Selection
 
@@ -213,9 +213,13 @@ questions:
 For new entities, generate collision-free IDs:
 
 ```bash
-# Use the ID generator skill/script
-FEATURE_ID=$(./skills/speclan-id-generator/scripts/generate-id.sh feature "$SPECLAN_DIR")
-REQ_ID=$(./skills/speclan-id-generator/scripts/generate-id.sh requirement "$SPECLAN_DIR")
+SCRIPT="${CLAUDE_PLUGIN_ROOT}/skills/speclan-id-generator/scripts/generate-id.mjs"
+
+# Generate a feature ID
+FEATURE_ID=$(node "$SCRIPT" --type feature --speclan-root "$SPECLAN_DIR" | jq -r '.data.ids[0]')
+
+# Generate a requirement ID under a parent feature
+REQ_ID=$(node "$SCRIPT" --type requirement --parent "$FEATURE_ID" --speclan-root "$SPECLAN_DIR" | jq -r '.data.ids[0]')
 ```
 
 ### 5.2 Create New Features
@@ -250,48 +254,7 @@ For each new feature:
    <Bullet points of functionality - user-facing capabilities, not code details>
    ```
 
-**CRITICAL: Specs must be 100% implementation and architecture agnostic.**
-
-DO NOT include any of the following in specs:
-
-**Implementation Details:**
-- File paths, directory names, or code locations
-- Class names, function names, or variable names
-- Library names, framework references, or technology choices (e.g., "JWT", "Redis", "PostgreSQL")
-- API endpoint paths or route definitions
-- Database table/column names or schema details
-- Code fragments, snippets, or pseudocode
-- Configuration file references
-- Technical implementation approaches
-
-**Architecture Details:**
-- Design patterns used (e.g., "MVC", "event-driven", "microservices", "singleton")
-- System architecture decisions (e.g., "monolith vs microservices", "serverless")
-- Component relationships or dependencies (e.g., "service A calls service B")
-- Data flow or sequence diagrams
-- Infrastructure choices (e.g., "deployed on AWS Lambda", "uses message queue")
-- Caching strategies, scaling approaches, or performance optimizations
-- Internal module boundaries or layering decisions
-- Protocol choices (e.g., "REST", "GraphQL", "WebSocket")
-
-DO include:
-- User-facing capabilities and behaviors
-- Business value and purpose
-- Functional requirements (what the system does)
-- User stories and acceptance criteria
-- Expected outcomes from user perspective
-
-**Example - WRONG:** "JWT-based authentication with refresh tokens stored in Redis"
-**Example - RIGHT:** "Secure login that keeps users signed in across sessions"
-
-**Example - WRONG:** "Validates CSV format using the FileValidator class in src/validators/"
-**Example - RIGHT:** "Validates uploaded files meet the required format before processing"
-
-**Example - WRONG:** "Uses event-driven architecture with message queues for async processing"
-**Example - RIGHT:** "Processes large imports without blocking the user interface"
-
-**Example - WRONG:** "Implements repository pattern with PostgreSQL for data persistence"
-**Example - RIGHT:** "Stores and retrieves user data reliably"
+Specs must be 100% implementation and architecture agnostic. For the complete DO/DON'T list with examples, consult `references/implementation-agnostic-guidelines.md`.
 
 ### 5.3 Update Existing Features
 
@@ -301,7 +264,6 @@ For features with editable status (draft, review, approved):
 2. **Update relevant sections:**
    - Add new scope items (user-facing capabilities only)
    - Update description if needed (keep implementation-agnostic)
-   - Add acceptance criteria if applicable
 3. **Update `updated` timestamp**
 4. **Write file back**
 
@@ -313,7 +275,7 @@ For locked entities (features or requirements in-development, under-test, releas
 
 1. **Generate CR ID:**
    ```bash
-   CR_ID=$(./skills/speclan-id-generator/scripts/generate-id.sh change-request "$SPECLAN_DIR")
+   CR_ID=$(node "$SCRIPT" --type change-request --speclan-root "$SPECLAN_DIR" | jq -r '.data.ids[0]')
    ```
 
 2. **Create CR file:**
@@ -335,7 +297,7 @@ For locked entities (features or requirements in-development, under-test, releas
    ---
    ```
 
-   **Note:** Change request descriptions must also be implementation and architecture agnostic. Describe the user-facing change, not the technical approach or architectural decisions.
+   **Note:** Change request descriptions must also be implementation-agnostic (see guidelines).
 
 3. **Place in correct location (adjacent to target entity):**
    ```

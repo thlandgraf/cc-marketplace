@@ -1,19 +1,44 @@
 ---
 name: spec-converter
-color: green
-description: |
-  Use this agent when:
-  <example>User wants to convert speckit specs to SPECLAN format</example>
-  <example>User asks to prepare SPECLAN specs for speckit processing</example>
-  <example>User needs to transform specifications between formats</example>
+color: cyan
+model: opus
+description: Use this agent when the user wants to convert specifications between speckit and SPECLAN formats. Examples:
+
+  <example>
+  Context: User wants to convert speckit specs to SPECLAN format
+  user: "Convert my speckit specs to SPECLAN format"
+  assistant: "I'll use the spec-converter agent to transform the specifications."
+  <commentary>
+  Speckit to SPECLAN conversion request triggers the agent.
+  </commentary>
+  </example>
+
+  <example>
+  Context: User asks to prepare SPECLAN specs for speckit processing
+  user: "Prepare these SPECLAN specs for speckit"
+  assistant: "I'll use the spec-converter agent to prepare the specs."
+  <commentary>
+  SPECLAN to speckit preparation triggers the agent.
+  </commentary>
+  </example>
+
+  <example>
+  Context: User needs to transform specifications between formats
+  user: "Transform these specifications to the other format"
+  assistant: "I'll use the spec-converter agent to handle the conversion."
+  <commentary>
+  Generic format transformation triggers the agent.
+  </commentary>
+  </example>
 tools:
   - Read
   - Write
   - Glob
   - Grep
   - Bash
-model: opus
 ---
+
+You are a specification format converter specializing in bidirectional transformation between speckit and SPECLAN formats.
 
 # Spec Converter Agent
 
@@ -40,10 +65,10 @@ specs/
 ```
 
 **Content sections:**
-- User Scenarios (P1-P4 priorities)
+- User Stories (P1-P4 priorities)
 - Functional Requirements (FR-###)
 - Success Criteria (SC-###)
-- Given/When/Then acceptance scenarios
+- Given/When/Then acceptance criteria
 
 ## SPECLAN Format Understanding
 
@@ -85,8 +110,7 @@ goals: [G-001]
 |-----------------|----------------|
 | Feature Branch | Feature (F-####) |
 | FR-### | Requirement (R-####) |
-| Acceptance Scenario | Scenario (S-####) |
-| SC-### | AcceptanceCriterion (AC-####) |
+| SC-### | Inline acceptance criteria in requirements |
 
 ### Conversion Process
 
@@ -104,8 +128,7 @@ goals: [G-001]
 
 1. Collect approved Features
 2. Gather linked Requirements
-3. Include Scenarios and ACs
-4. Format as speckit structure
+3. Format as speckit structure
 
 ## Conversion Validation
 

@@ -32,8 +32,7 @@ Query SPECLAN entities with flexible filtering and JSON output.
 
 Options:
   -t, --type TYPE              Entity type to query (required)
-                               Values: goal, feature, requirement, scenario,
-                                       acceptance-criterion, test, change-request, all
+                               Values: goal, feature, requirement, change-request, all
   -s, --filter-status STATUS   Filter by status (reads frontmatter)
                                Values: draft, review, approved, in-development,
                                        under-test, released, deprecated
@@ -131,16 +130,7 @@ get_entity_config() {
       echo "F-*.md:features"
       ;;
     requirement)
-      echo "R-*.md:features"
-      ;;
-    scenario)
-      echo "S-*.md:features"
-      ;;
-    acceptance-criterion)
-      echo "AC-*.md:features"
-      ;;
-    test)
-      echo "T-*.md:features"
+      echo "R-*.md:requirements"
       ;;
     change-request)
       echo "CR-*.md:."
@@ -163,9 +153,6 @@ get_type_from_id() {
     F-*) echo "feature" ;;
     R-*) echo "requirement" ;;
     CR-*) echo "change-request" ;;
-    S-*) echo "scenario" ;;
-    AC-*) echo "acceptance-criterion" ;;
-    T-*) echo "test" ;;
     *) echo "unknown" ;;
   esac
 }
@@ -311,7 +298,7 @@ query_entities() {
   # Handle 'all' type specially - query each type
   if [[ "$etype" == "all" ]]; then
     local all_results=()
-    local types=("goal" "feature" "requirement" "change-request" "scenario" "acceptance-criterion" "test")
+    local types=("goal" "feature" "requirement" "change-request")
 
     for t in "${types[@]}"; do
       local results
@@ -361,7 +348,7 @@ query_single_type() {
   config=$(get_entity_config "$etype")
   if [[ $? -ne 0 ]]; then
     echo "ERROR: Invalid entity type: $etype" >&2
-    echo "Valid types: goal, feature, requirement, scenario, acceptance-criterion, test, change-request, all" >&2
+    echo "Valid types: goal, feature, requirement, change-request, all" >&2
     exit 1
   fi
 

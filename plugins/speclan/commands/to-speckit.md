@@ -63,8 +63,8 @@ To approve a feature for specification:
 Current feature statuses:
 | Feature | Status |
 |---------|--------|
-| F-001 | draft |
-| F-002 | review |
+| F-1001 | draft |
+| F-1002 | review |
 | ... | ... |
 ```
 
@@ -73,7 +73,6 @@ Current feature statuses:
 For each approved feature, gather:
 - Feature description and user stories
 - All linked requirements
-- Scenarios and acceptance criteria
 - Business rules
 
 ### 4. Generate Concatenated Specification
@@ -88,7 +87,7 @@ Source: SPECLAN specifications
 
 ---
 
-## Feature: [F-XXX] [Title]
+## Feature: [F-XXXX] [Title]
 
 [Full feature content]
 
@@ -96,36 +95,37 @@ Source: SPECLAN specifications
 
 #### [R-XXXX] [Title]
 
-[Requirement content with scenarios]
+[Requirement content]
 
 ---
 
-## Feature: [F-YYY] [Title]
+## Feature: [F-YYYY] [Title]
 
 [Next feature...]
 ```
 
-### 5. Invoke Speckit
+### 5. Write Specification Package
 
-**Note:** This integration is TBD pending speckit API clarification.
+Write the concatenated specification to a temporary file:
 
-Current approach:
-1. Write concatenated spec to temporary file
-2. Invoke `/speckit.specify` with the file
-3. Or display spec for manual processing
+```bash
+# Write to timestamped file
+PACKAGE_PATH="/tmp/speclan-to-speckit-$(date +%Y%m%d-%H%M%S).md"
+```
 
+Display the result:
 ```
 Prepared specification package with [X] approved features.
 
 ## Included Features
-- F-001: [Title]
-- F-002: [Title]
+- F-1001: [Title]
+- F-1002: [Title]
 
 ## Specification Package
-[Path to generated file]
+Written to: [PACKAGE_PATH]
 
 To process with speckit:
-  /speckit.specify [path-to-spec-package]
+  /speckit.specify [PACKAGE_PATH]
 ```
 
 ### 6. Handle Partial Selection
@@ -136,13 +136,13 @@ If user provides specific feature IDs:
 - Allow override with confirmation
 
 ```
-/speclan:to-speckit F-001 F-003
+/speclan:to-speckit F-1001 F-1003
 
 Including specified features:
-- F-001: approved ✓
-- F-003: draft ⚠ (not approved)
+- F-1001: approved ✓
+- F-1003: draft ⚠ (not approved)
 
-Proceed with F-003 despite draft status? [y/N]
+Proceed with F-1003 despite draft status? [y/N]
 ```
 
 ## Output Format
@@ -154,14 +154,13 @@ Proceed with F-003 despite draft status? [y/N]
 ### Approved Features Included
 | ID | Title | Requirements |
 |----|-------|--------------|
-| F-001 | Core Extension | 5 |
-| F-002 | Live Updates | 3 |
+| F-1001 | Core Extension | 5 |
+| F-1002 | Live Updates | 3 |
 
 ### Generated Package
 Location: /tmp/speclan-to-speckit-[timestamp].md
 Size: [X] KB
 Total Requirements: [Y]
-Total Scenarios: [Z]
 
 ### Next Step
 Run: /speckit.specify /tmp/speclan-to-speckit-[timestamp].md
@@ -183,9 +182,4 @@ Approve features by updating their status to 'approved' in YAML frontmatter.
 
 ## Integration Notes
 
-**TBD:** The exact integration with speckit is pending clarification:
-- How `/speckit.specify` accepts input
-- Required format for specification injection
-- Expected output from speckit processing
-
-For now, this command prepares specifications in a format suitable for manual speckit processing.
+This command generates a specification package file. The user invokes `/speckit.specify` separately with the generated file path to process the specifications through speckit.

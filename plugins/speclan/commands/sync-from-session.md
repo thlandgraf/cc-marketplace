@@ -95,11 +95,11 @@ Use this guidance to:
 
 Apply the `Sync Specs from Session` skill for detailed workflow guidance.
 
-### 3. Analyze Session Context
+### 4. Analyze Session Context
 
 Review the conversation history to identify implementation work:
 
-#### 3.1 Scan for Code Changes
+#### 4.1 Scan for Code Changes
 
 Look for evidence of implementation:
 - **File writes/edits**: Write and Edit tool usage
@@ -108,7 +108,7 @@ Look for evidence of implementation:
 - **Data models**: Schema changes, type definitions
 - **Tests added**: Test files created or modified
 
-#### 3.2 Extract Feature Candidates
+#### 4.2 Extract Feature Candidates
 
 For each identified change, determine:
 - **Title**: Descriptive name for the feature
@@ -116,7 +116,7 @@ For each identified change, determine:
 - **Code paths**: Files involved
 - **Type**: new feature, enhancement, or bugfix
 
-#### 3.3 Infer Requirements from Implementation
+#### 4.3 Infer Requirements from Implementation
 
 **Critical step:** Analyze implemented code to discover undocumented requirements:
 
@@ -141,13 +141,13 @@ Code: if (!user.hasPermission('admin')) return 403
 Inferred requirement: "Only administrators can access this functionality"
 ```
 
-#### 3.4 Group Related Changes
+#### 4.4 Group Related Changes
 
 Consolidate related changes:
 - Multiple files for one feature = single feature entry
 - Independent changes = separate feature entries
 
-### 4. Detect Speclan Directory
+### 5. Detect Speclan Directory
 
 ```bash
 # Find speclan directory
@@ -162,19 +162,19 @@ fi
 
 If no speclan directory exists, ask user if they want to initialize one.
 
-### 5. Index Existing Specs
+### 6. Index Existing Specs
 
 If speclan exists, use the SPECLAN Query skill to build an index:
 
 ```bash
 # List all features with full metadata (JSON output)
-"${PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" --type feature --full speclan
+"${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" --type feature --full speclan
 
 # List requirements for a specific feature
-"${PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" --type requirement --parent F-1234 --full speclan
+"${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" --type requirement --parent F-1234 --full speclan
 
 # Filter by status (e.g., find editable features)
-"${PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" --type feature --filter-status draft --full speclan
+"${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" --type feature --filter-status draft --full speclan
 ```
 
 **Output format (JSON):**
@@ -189,7 +189,7 @@ Use this to:
 2. Determine if features are editable or locked
 3. Identify where to add new requirements
 
-### 6. Compare and Classify Changes
+### 7. Compare and Classify Changes
 
 For each feature candidate from session analysis:
 
@@ -203,7 +203,7 @@ For each feature candidate from session analysis:
 **Editable statuses:** draft, review, approved
 **Locked statuses:** in-development, under-test, released, deprecated
 
-#### 6.1 Prioritize Requirement Discovery
+#### 7.1 Prioritize Requirement Discovery
 
 **Most syncs should produce new requirements, not just feature updates.**
 
@@ -226,7 +226,7 @@ Implementation adds: retry logic, validation, success toast, error handling
 
 **Rule of thumb:** If you wrote more than 20 lines of code for a feature, there's probably at least one missing requirement.
 
-### 7. Present Changes to User
+### 8. Present Changes to User
 
 Show identified changes and ask for confirmation:
 
@@ -266,14 +266,14 @@ questions:
       # ... additional options
 ```
 
-### 8. Handle Dry Run
+### 9. Handle Dry Run
 
 If `--dry-run` flag provided:
 - Show all changes that would be made
 - Do NOT write any files
 - Report: "Dry run complete. No changes made."
 
-### 9. Apply Selected Changes
+### 10. Apply Selected Changes
 
 For each user-selected change:
 
@@ -334,7 +334,7 @@ generate_cr_id() {
 }
 ```
 
-#### 9.1 Create New Features
+#### 10.1 Create New Features
 
 1. Generate feature ID and get owner:
    ```bash
@@ -377,14 +377,14 @@ generate_cr_id() {
 
 Focus on WHAT the feature does for users, not HOW it's built.
 
-#### 9.2 Update Existing Features
+#### 10.2 Update Existing Features
 
 1. Read current feature file
 2. Update relevant sections (scope, implementation notes)
 3. Update `updated` timestamp
 4. Write file back
 
-#### 9.3 Create Change Requests
+#### 10.3 Create Change Requests
 
 For locked features or requirements:
 
@@ -404,7 +404,7 @@ For locked features or requirements:
 
 3. Write CR file with proper frontmatter (parentType: feature or requirement)
 
-#### 9.4 Create New Requirements
+#### 10.4 Create New Requirements
 
 1. Generate requirement ID:
    ```bash
@@ -421,7 +421,7 @@ For locked features or requirements:
    ```
 4. Update parent feature's `updated` timestamp
 
-### 10. Report Results
+### 11. Report Results
 
 ```markdown
 ## Sync Complete

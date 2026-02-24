@@ -42,9 +42,6 @@ Count spec files in each category:
 | Goals | `goals/` | `G-*.md` |
 | Features | `features/` | `F-*.md` (recursive) |
 | Requirements | `requirements/` or within features | `R-*.md` |
-| Scenarios | within requirements | `S-*.md` |
-| Acceptance Criteria | within scenarios | `AC-*.md` |
-| Tests | within criteria | `T-*.md` |
 | Templates | `templates/` | `*.md` |
 
 ### 4. Analyze Status Distribution
@@ -62,7 +59,6 @@ Parse YAML frontmatter to count specs by status:
 
 Calculate coverage metrics:
 - Features with at least one requirement
-- Requirements with at least one scenario
 - Approved features ready for implementation
 
 ### 6. Display Results
@@ -98,7 +94,6 @@ Present as formatted tables:
 | Metric | Value |
 |--------|-------|
 | Features with requirements | X% |
-| Requirements with scenarios | X% |
 | Approved features | X |
 ```
 

@@ -1,16 +1,39 @@
 ---
 name: requirement-verifier
 color: yellow
-description: |
-  Use this agent when:
-  <example>User wants to verify a requirement is implemented</example>
-  <example>User asks to check if requirement R-XXXX is satisfied</example>
-  <example>Checking implementation against requirement specification</example>
+model: sonnet
+description: Use this agent when the user wants to verify a requirement is implemented, check if a specific requirement is satisfied, or verify implementation against requirement specs. Examples:
+
+  <example>
+  Context: User wants to verify a requirement is implemented
+  user: "Verify that R-1234 is implemented correctly"
+  assistant: "I'll use the requirement-verifier agent to check the implementation."
+  <commentary>
+  User requesting requirement verification, trigger requirement-verifier.
+  </commentary>
+  </example>
+
+  <example>
+  Context: User asks to check if requirement R-XXXX is satisfied
+  user: "Is R-2046 satisfied by the current code?"
+  assistant: "I'll use the requirement-verifier agent to verify."
+  <commentary>
+  Specific requirement check triggers the agent.
+  </commentary>
+  </example>
+
+  <example>
+  Context: Checking implementation against requirement specification
+  user: "Check all requirements for F-1049 against the codebase"
+  assistant: "I'll use the requirement-verifier agent to check each requirement."
+  <commentary>
+  Batch requirement verification triggers the agent.
+  </commentary>
+  </example>
 tools:
   - Read
   - Glob
   - Grep
-  - Edit
   - Bash
 ---
 
@@ -20,7 +43,7 @@ Verify that a SPECLAN requirement is correctly implemented in the codebase.
 
 ## Purpose
 
-Analyze the codebase to determine if a specific requirement's enforcement rules, scenarios, and business rules are properly implemented.
+Analyze the codebase to determine if a specific requirement's enforcement rules and business rules are properly implemented.
 
 ## Input
 
@@ -43,13 +66,6 @@ The system must:
 3. Display error message when blocked
 ```
 
-**Scenarios** - From YAML `scenarios:` array:
-```yaml
-scenarios:
-  - Attempt to add quarantined pet to cart
-  - Validate order containing pet with restricted status
-```
-
 **Business Rules** - From "Business Rule Reference":
 ```
 - PS-001: Pets in QUARANTINE cannot be sold
@@ -63,10 +79,6 @@ For each enforcement rule:
 - Look for validation logic, guards, checks
 - Check service/controller layers
 
-For each scenario:
-- Look for test files covering the scenario
-- Search for code paths handling the scenario
-
 For each business rule:
 - Find constants/enums with rule IDs
 - Verify rule is enforced in business logic
@@ -75,12 +87,10 @@ For each business rule:
 
 **VERIFIED** - All conditions met:
 - All enforcement rules have corresponding code
-- Scenarios have test coverage or clear code paths
 - Business rules are implemented
 
 **NOT VERIFIED** - Any gap found:
 - Missing enforcement implementation
-- Uncovered scenarios
 - Business rule not enforced
 
 ### 4. Report Results
@@ -99,12 +109,6 @@ Return structured verification result:
 | Block quarantined pets | ✓ | PetValidator.ts:23 |
 | Display error message | ✗ | Not found |
 
-### Scenarios
-| Scenario | Status | Evidence |
-|----------|--------|----------|
-| Add quarantined pet to cart | ✓ | cart.spec.ts:120 |
-| POS sale blocked | ✗ | No test found |
-
 ### Business Rules
 | Rule | Status | Evidence |
 |------|--------|----------|
@@ -113,7 +117,6 @@ Return structured verification result:
 ### Gaps (if NOT_VERIFIED)
 1. Missing error message display when pet is blocked
 2. No POS sale flow validation
-3. Missing test for POS scenario
 
 ### Fix Instructions
 To resolve gaps:
@@ -159,7 +162,7 @@ grep -r "QUARANTINE\|MEDICAL_HOLD" --include="*.ts"
 **High Confidence** - Clear match:
 - Explicit rule ID in code comments
 - Function name matches rule
-- Test describes exact scenario
+- Test describes exact requirement
 
 **Medium Confidence** - Implicit match:
 - Logic appears to implement rule

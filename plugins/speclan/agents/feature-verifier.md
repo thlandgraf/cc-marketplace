@@ -1,13 +1,35 @@
 ---
 name: feature-verifier
 color: green
-description: |
-  Use this agent when:
-  <example>User wants to verify features are implemented correctly</example>
-  <example>User asks to check implementation against feature specs</example>
-  <example>Verifying features with status "under-test" or "in-development"</example>
-  <example>User wants a verification report for a set of features</example>
-  <example>Deep verification of feature implementation against SPECLAN specs</example>
+model: sonnet
+description: Use this agent when the user wants to verify features are implemented correctly, check implementation against feature specs, or needs a verification report. Examples:
+
+  <example>
+  Context: User wants to verify features are implemented correctly
+  user: "Verify that F-1234 is fully implemented"
+  assistant: "I'll use the feature-verifier agent to perform deep verification."
+  <commentary>
+  User requesting feature implementation verification, trigger feature-verifier.
+  </commentary>
+  </example>
+
+  <example>
+  Context: User asks to check implementation against feature specs
+  user: "Check if the pet management feature passes verification"
+  assistant: "I'll use the feature-verifier agent to check the implementation."
+  <commentary>
+  Feature verification request triggers the agent.
+  </commentary>
+  </example>
+
+  <example>
+  Context: Verifying features with status under-test or in-development
+  user: "Run verification on all features in development"
+  assistant: "I'll use the feature-verifier agent to verify each feature."
+  <commentary>
+  Batch verification of in-development features triggers the agent.
+  </commentary>
+  </example>
 tools:
   - Read
   - Glob
@@ -34,7 +56,7 @@ You will receive input in one of these formats:
 ```
 Verify features:
 - F-1049-{slug}
-- F-200-{slug}
+- F-2000-{slug}
 
 SPECLAN directory: speclan/
 ```
@@ -62,7 +84,7 @@ SPECLAN directory: speclan/
 Create todo items:
 ```
 - Verify F-1049: Pet Management (pending)
-- Verify F-200: Pet Health (pending)
+- Verify F-2000: Pet Health (pending)
 ```
 
 ### Phase 2: Deep Feature Understanding (per feature)
@@ -78,8 +100,6 @@ Goal (G-XXX)
   └── Parent Feature (if any)
         └── THIS FEATURE (F-XXXX)
               ├── Requirements (R-XXXX)
-              │     ├── Scenarios (S-XXXX)
-              │     └── Acceptance Criteria (AC-XXXX)
               └── Sub-features (if any)
 ```
 
@@ -100,7 +120,7 @@ Goal (G-XXX)
      ```bash
      find speclan/features/F-XXXX-*/requirements -type d -name 'R-*' 2>/dev/null
      ```
-   - For each requirement directory, read the requirement file and find scenarios
+   - For each requirement directory, read the requirement file
    - Check for sub-features in directory structure
 
 4. **Follow markdown links (selective):**
@@ -118,8 +138,6 @@ From the feature context, identify what must be verified:
 | User Story | User workflow is possible |
 | Scope items | Each scope item implemented |
 | Requirements | Enforcement rules in code |
-| Scenarios | Test coverage or code paths |
-| Acceptance Criteria | Specific conditions met |
 | Business Rules | Rules enforced in logic |
 
 Create verification checklist:
@@ -135,9 +153,6 @@ Feature F-1049: Pet Management
 │   │   └── [ ] Error message displayed
 │   └── R-0002: Status transitions
 │       └── [ ] State machine implemented
-└── Scenarios:
-    ├── [ ] S-0001: Add pet to inventory
-    └── [ ] S-0002: Update pet status
 ```
 
 ### Phase 3: Implementation Verification
@@ -186,7 +201,7 @@ grep -r "addToCart\|checkout\|petStatus" src/ --include="*.tsx"
 # Find test files
 find . -name "*.spec.ts" -o -name "*.test.ts" | xargs grep -l "pet\|Pet"
 
-# Check scenario coverage
+# Check test coverage
 grep -r "describe.*Pet\|it.*should.*pet" --include="*.spec.ts"
 ```
 
@@ -213,7 +228,7 @@ Identify missing implementations:
 - [ ] Missing status transition validation
 
 ### Major (incomplete feature)
-- [ ] No test for scenario S-0002
+- [ ] No test for status update requirement
 - [ ] Error messages not user-friendly
 
 ### Minor (polish)
@@ -241,9 +256,9 @@ Identify missing implementations:
 
 ## Feature Context
 - **Goal:** G-XXX - [Goal Title]
-- **Parent:** F-YYY - [Parent Title] (if any)
+- **Parent:** F-YYYY - [Parent Title] (if any)
 - **Requirements:** 3 (R-0001, R-0002, R-0003)
-- **Sub-features:** 2 (F-201, F-202)
+- **Sub-features:** 2 (F-2001, F-2002)
 
 ## Verification Results
 
@@ -272,13 +287,6 @@ Identify missing implementations:
 | State machine | ✅ | `PetStateMachine.ts` |
 | Transition validation | ✅ | `validateTransition()` |
 
-### Scenarios
-
-| Scenario | Status | Evidence |
-|----------|--------|----------|
-| S-0001: Add pet | ✅ | `pet.spec.ts:50` |
-| S-0002: Update status | ⚠️ | Code exists, no test |
-
 ### Test Coverage
 - Unit tests: 12 passing
 - Integration tests: 3 passing
@@ -293,7 +301,7 @@ None
 1. **POS quarantine bypass** - R-0001 not enforced in POS flow
    - Fix: Add validation in `POSService.processSale()`
 
-2. **Missing S-0002 test** - Status update scenario untested
+2. **Missing status update test** - Status update untested
    - Fix: Add test in `pet.spec.ts`
 
 ### Minor
@@ -325,8 +333,8 @@ After verifying all features, generate summary:
 | Feature | Status | Coverage | Critical | Major | Minor |
 |---------|--------|----------|----------|-------|-------|
 | F-1049 | ✅ | 95% | 0 | 1 | 2 |
-| F-200 | ⚠️ | 70% | 1 | 2 | 1 |
-| F-301 | ❌ | 30% | 3 | 2 | 0 |
+| F-2000 | ⚠️ | 70% | 1 | 2 | 1 |
+| F-3001 | ❌ | 30% | 3 | 2 | 0 |
 
 ## Overall Statistics
 - Features verified: 3
@@ -335,13 +343,13 @@ After verifying all features, generate summary:
 - Not verified: 1 (33%)
 
 ## Critical Issues (Must Fix)
-1. F-200: Missing health record validation
-2. F-301: Report generation not implemented
-3. F-301: Data aggregation incomplete
+1. F-2000: Missing health record validation
+2. F-3001: Report generation not implemented
+3. F-3001: Data aggregation incomplete
 
 ## Recommended Priority
-1. F-301 - Most gaps, needs attention
-2. F-200 - One critical issue
+1. F-3001 - Most gaps, needs attention
+2. F-2000 - One critical issue
 3. F-1049 - Minor polish only
 ```
 
@@ -349,7 +357,7 @@ After verifying all features, generate summary:
 
 **HIGH (✅):**
 - Exact code match found
-- Test explicitly covers scenario
+- Test explicitly covers requirement
 - Clear 1:1 mapping to requirement
 
 **MEDIUM (⚠️):**

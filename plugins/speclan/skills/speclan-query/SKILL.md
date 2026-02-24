@@ -1,8 +1,7 @@
 ---
 name: SPECLAN Query
-description: This skill should be used when querying SPECLAN specifications by type, status, or parent relationship. Use when user asks to "list features", "find requirements", "show approved specs", "get children of feature", "index specs", or needs to search/filter SPECLAN entities programmatically.
+description: This skill should be used when the user asks to "list features", "find requirements", "show approved specs", "get children of a feature", "index specs", "query specs by status", or needs to search, filter, or programmatically query SPECLAN entities by type, status, or parent relationship.
 version: 0.1.0
-context: fork
 ---
 
 # SPECLAN Query
@@ -24,9 +23,6 @@ Fast, flexible querying of SPECLAN entities with JSON output. Query by type, fil
 | goal | G- | G-###-*.md | goals/ |
 | feature | F- | F-####-*.md | features/ (recursive) |
 | requirement | R- | R-####-*.md | features/.../requirements/ |
-| scenario | S- | S-####-*.md | features/.../scenarios/ |
-| acceptance-criterion | AC- | AC-####-*.md | features/.../acceptance-criteria/ |
-| test | T- | T-####-*.md | features/.../tests/ |
 | change-request | CR- | CR-####-*.md | Anywhere in change-requests/ |
 
 ## Usage
@@ -211,33 +207,12 @@ EDITABLE=$("${PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" --type feature
 done
 ```
 
-## Status Lifecycle Reference
+## Status Reference
 
-**Editable statuses** (can be modified directly):
-- `draft`
-- `review`
-- `approved`
-
-**Locked statuses** (require change-request):
-- `in-development`
-- `under-test`
-- `released`
-- `deprecated`
-
-Use this for classification:
-
-```bash
-# Get editable features
-./query.sh --type feature --filter-status draft speclan
-./query.sh --type feature --filter-status review speclan
-./query.sh --type feature --filter-status approved speclan
-
-# Or check in code
-case "$entity_status" in
-  draft|review|approved) editable=true ;;
-  *) editable=false ;;
-esac
-```
+For the full status lifecycle and editability rules, consult the
+`speclan-format` skill. Key point: statuses `draft`, `review`, `approved`
+are editable; `in-development`, `under-test`, `released` require Change Requests;
+`deprecated` is permanently frozen.
 
 ## Error Handling
 

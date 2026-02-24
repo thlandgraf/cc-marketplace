@@ -1,247 +1,138 @@
 ---
 name: SPECLAN ID Generator
-description: This skill should be used when generating IDs for SPECLAN entities, creating new specs, or needing collision-free unique identifiers. Use when user asks to "create a spec", "generate ID", "new feature ID", "unique requirement ID", or when commands need to assign IDs to new entities.
-version: 0.1.0
-context: fork
+description: This skill should be used when the user needs to generate IDs for SPECLAN entities, asks to "generate an ID", "new feature ID", "unique requirement ID", "create a collision-free ID", or when any command or agent needs to assign IDs to new SPECLAN entities.
+version: 0.2.0
 ---
 
 # SPECLAN ID Generator
 
-Generate unique, collision-free random IDs for SPECLAN entities with automatic retry and comprehensive collision detection.
+Generate unique, collision-free IDs for SPECLAN entities with parent-aware end-biased ordering and automatic collision detection.
 
 ## Why Use This Skill
 
-- **Collision-free:** Automatically checks existing IDs and retries if collision detected
+- **Collision-free:** Scans existing speclan directory and retries on collision
 - **Entity-aware:** Correct format for each entity type (goals: 3-digit, others: 4-digit)
-- **Comprehensive detection:** Checks both filenames AND frontmatter
-- **Reusable:** Single script usable by all commands and agents
+- **Parent-aware:** `--parent` flag generates IDs biased after existing siblings, preserving natural ordering
+- **Batch generation:** Generate multiple IDs in a single call with internal deduplication
 
 ## Entity ID Formats
 
 | Entity Type | Prefix | Digits | Range | Example |
 |-------------|--------|--------|-------|---------|
-| goal | G- | 3 | 100-999 | G-142 |
-| feature | F- | 4 | 1000-9999 | F-1847 |
-| requirement | R- | 4 | 1000-9999 | R-3928 |
-| change-request | CR- | 4 | 1000-9999 | CR-7291 |
-| scenario | S- | 4 | 1000-9999 | S-4521 |
-| acceptance-criterion | AC- | 4 | 1000-9999 | AC-2847 |
-| test | T- | 4 | 1000-9999 | T-1029 |
+| goal | G- | 3 | 000-999 | G-142 |
+| feature | F- | 4 | 0000-9999 | F-1847 |
+| requirement | R- | 4 | 0000-9999 | R-3928 |
+| change-request | CR- | 4 | 0000-9999 | CR-7291 |
 
-**ID-Based Ordering:** IDs determine artifact priority numerically. Lower IDs = higher priority. When generating IDs for artifacts that should have specific priority relative to existing ones, consider the ID range carefully.
+**ID-Based Ordering:** Lower IDs = higher priority. The `--parent` flag generates IDs that come after existing siblings, maintaining natural creation order within a hierarchy.
 
-## Usage
+## Primary CLI: generate-id.mjs (Node.js)
 
 ### Script Location
 
 ```
-${PLUGIN_ROOT}/skills/speclan-id-generator/scripts/generate-id.sh
+${CLAUDE_PLUGIN_ROOT}/skills/speclan-id-generator/scripts/generate-id.mjs
 ```
 
 ### Command Line
 
 ```bash
-./generate-id.sh <entity-type> [count] [speclan-dir]
+node generate-id.mjs --type <entityType> [--parent <id>] [--count <n>] [--speclan-root <path>]
 ```
 
-**Arguments:**
-- `entity-type` - Required. One of: `goal`, `feature`, `requirement`, `change-request`, `scenario`, `acceptance-criterion`, `test`
-- `count` - Optional. Number of IDs to generate (default: 1)
-- `speclan-dir` - Optional. Path to speclan directory (defaults to `./speclan`)
+**Flags:**
+- `--type <type>` - Required. One of: `goal`, `feature`, `requirement`, `changeRequest` (or `change-request`)
+- `--parent <id>` - Optional. Parent entity ID for end-biased generation. The parent must exist on disk.
+- `--count <n>` - Optional. Number of IDs to generate (default: 1, max: 100)
+- `--speclan-root <path>` - Optional. Path to speclan directory (auto-detected if omitted)
 
-**Output:**
-- Success: Prints unique ID(s) to stdout, one per line
-- Failure: Prints error to stderr, exits with code 1
+**Output:** JSON to stdout:
+```json
+{"ok":true,"data":{"type":"feature","ids":["F-1847","F-2934"]}}
+```
+
+**Error output:** JSON to stdout with exit code 1:
+```json
+{"ok":false,"error":"PARENT_NOT_FOUND","message":"Parent entity not found: F-9999","context":{"parentId":"F-9999"}}
+```
 
 ### Examples
 
 ```bash
+SCRIPT="${CLAUDE_PLUGIN_ROOT}/skills/speclan-id-generator/scripts/generate-id.mjs"
+
 # Generate a single feature ID
-./generate-id.sh feature
-# Output: F-1847
+node "$SCRIPT" --type feature --speclan-root /path/to/speclan
+# {"ok":true,"data":{"type":"feature","ids":["F-1847"]}}
 
-# Generate 5 requirement IDs at once
-./generate-id.sh requirement 5
-# Output:
-# R-3928
-# R-4521
-# R-7832
-# R-1293
-# R-5647
+# Generate 3 feature IDs
+node "$SCRIPT" --type feature --count 3 --speclan-root /path/to/speclan
+# {"ok":true,"data":{"type":"feature","ids":["F-1847","F-2934","F-5621"]}}
 
-# Generate 3 feature IDs with custom speclan path
-./generate-id.sh feature 3 /path/to/project/speclan
-# Output:
-# F-1142
-# F-2893
-# F-5467
+# Generate child feature IDs under a parent (end-biased after siblings)
+node "$SCRIPT" --type feature --parent F-1847 --count 2 --speclan-root /path/to/speclan
+# {"ok":true,"data":{"type":"feature","ids":["F-3012","F-3498"]}}
 
-# Generate a change request ID
-./generate-id.sh change-request
-# Output: CR-7291
+# Generate requirement IDs under a child feature
+node "$SCRIPT" --type requirement --parent F-3012 --count 4 --speclan-root /path/to/speclan
+# {"ok":true,"data":{"type":"requirement","ids":["R-4521","R-4832","R-5293","R-5647"]}}
 ```
 
-### In Commands/Agents
+### Parsing Output
 
 ```bash
-# Capture single ID
-FEATURE_ID=$(./skills/speclan-id-generator/scripts/generate-id.sh feature speclan)
-echo "Created feature: $FEATURE_ID"
-
-# Generate multiple IDs at once (more efficient than multiple calls)
-REQ_IDS=$(./generate-id.sh requirement 5 speclan)
-echo "Created requirements:"
-echo "$REQ_IDS"
-
-# Parse multiple IDs into array
-mapfile -t REQ_ARRAY <<< "$(./generate-id.sh requirement 3 speclan)"
-echo "First: ${REQ_ARRAY[0]}, Second: ${REQ_ARRAY[1]}, Third: ${REQ_ARRAY[2]}"
-
-# Or use read for bash 3.x compatibility
-IFS=$'\n' read -d '' -r -a REQ_ARRAY <<< "$(./generate-id.sh requirement 3 speclan)" || true
+# Extract IDs array with jq
+node "$SCRIPT" --type feature --count 3 --speclan-root "$SPECLAN_DIR" | jq -r '.data.ids[]'
+# F-1847
+# F-2934
+# F-5621
 ```
 
-### Session-Aware Collision Detection
+### End-Biased Generation (--parent)
 
-When generating multiple IDs in a single call, the script tracks generated IDs within the session to ensure no duplicates, even before they're written to disk. This is more efficient than making multiple separate calls.
+When `--parent` is specified, the generator:
 
-## Algorithm
+1. Finds the parent entity on disk by scanning the speclan directory
+2. Reads existing sibling entities in the parent's directory
+3. Finds the highest sibling ID numerically
+4. Generates new IDs biased to come **after** that highest sibling (within a 500-ID window)
+5. Falls back to random generation if the window is exhausted
 
-The script implements a robust ID generation algorithm:
+**Valid parent relationships:**
+- `--type feature --parent F-XXXX` → child feature under parent feature
+- `--type requirement --parent F-XXXX` → requirement under feature
+- `--type changeRequest --parent F-XXXX` → CR under feature
+- `--type changeRequest --parent R-XXXX` → CR under requirement
+- `--type changeRequest --parent G-XXX` → CR under goal
+
+**Important:** The parent entity must exist on disk before using `--parent`. For hierarchical creation (like from-speckit conversion), write parent files first, then generate child IDs.
+
+## Fallback: generate-id.sh (Bash)
+
+If Node.js is not available, use the bash script:
 
 ```
-1. Parse entity type to get prefix, digit count, and range
-2. For up to 100 attempts:
-   a. Generate random number in range
-   b. Format as ID (e.g., F-2934)
-   c. Check for collisions:
-      - Search filenames: find speclan -name "F-2934-*"
-      - Search frontmatter: grep "^id: F-2934$"
-   d. If no collision, return ID
-3. If all attempts fail, exit with error
+${CLAUDE_PLUGIN_ROOT}/skills/speclan-id-generator/scripts/generate-id.sh
 ```
-
-## Collision Detection
-
-The script checks two locations for collisions:
-
-### 1. Filename/Directory Collision
-
-Searches for files or directories matching the ID pattern:
-```bash
-find "$speclan_dir" -name "${id}-*" -o -name "${id}.md"
-```
-
-This catches both directory-based and flat file entities:
-- `F-2934-my-feature/` (feature directory)
-- `R-4521-requirement/` (requirement directory)
-- `G-142-goal.md` (flat goal file)
-- `CR-1234-change.md` (flat change request file)
-
-### 2. Frontmatter Collision
-
-Searches for ID in YAML frontmatter:
-```bash
-grep -r "^id: ${id}$" "$speclan_dir"
-```
-
-This catches:
-- Files that were renamed but kept the original ID
-- IDs referenced but not yet written to files
-
-## Inline Algorithm (For Commands)
-
-If the script is not available, commands can use this inline algorithm:
 
 ```bash
-# Generate unique Feature ID (4-digit)
-generate_feature_id() {
-  local speclan_dir="${1:-speclan}"
-  local max_attempts=100
-
-  for attempt in $(seq 1 $max_attempts); do
-    # Generate random 4-digit number (1000-9999)
-    local num=$((RANDOM % 9000 + 1000))
-    local id="F-${num}"
-
-    # Check for collisions
-    if [ ! -d "$speclan_dir" ]; then
-      echo "$id"
-      return 0
-    fi
-
-    # Check filenames and frontmatter
-    if ! find "$speclan_dir" -name "${id}-*" 2>/dev/null | grep -q . && \
-       ! grep -r "^id: ${id}$" "$speclan_dir" 2>/dev/null | grep -q .; then
-      echo "$id"
-      return 0
-    fi
-  done
-
-  echo "ERROR: Could not generate unique ID" >&2
-  return 1
-}
-
-# Generate unique Requirement ID (4-digit)
-generate_requirement_id() {
-  local speclan_dir="${1:-speclan}"
-  local max_attempts=100
-
-  for attempt in $(seq 1 $max_attempts); do
-    # Generate random 4-digit number (1000-9999)
-    local num=$((RANDOM % 9000 + 1000))
-    local id="R-${num}"
-
-    if [ ! -d "$speclan_dir" ]; then
-      echo "$id"
-      return 0
-    fi
-
-    if ! find "$speclan_dir" -name "${id}-*" 2>/dev/null | grep -q . && \
-       ! grep -r "^id: ${id}$" "$speclan_dir" 2>/dev/null | grep -q .; then
-      echo "$id"
-      return 0
-    fi
-  done
-
-  echo "ERROR: Could not generate unique ID" >&2
-  return 1
-}
-
-# Usage
-FEATURE_ID=$(generate_feature_id speclan)
-REQ_ID=$(generate_requirement_id speclan)
+./generate-id.sh <entity-type> [count] [speclan-dir]
 ```
+
+**Output:** Plain text, one ID per line. No `--parent` support.
+
+See `references/inline-algorithm.md` for an inline bash algorithm when neither script is available.
 
 ## Error Handling
 
 | Exit Code | Meaning |
 |-----------|---------|
-| 0 | Success - ID printed to stdout |
-| 1 | Error - message printed to stderr |
+| 0 | Success - JSON/ID printed to stdout |
+| 1 | Error - JSON/message printed to stdout/stderr |
 
 **Common errors:**
-- Invalid entity type
-- Could not generate unique ID after 100 attempts (ID space exhausted)
-- Missing required arguments
-
-## Integration
-
-### With `infer-from-codebase` Command
-
-The command should use this skill for all ID generation:
-
-```markdown
-##### 3.4.4 Generate IDs
-
-Use the `speclan-id-generator` skill:
-
-\`\`\`bash
-FEATURE_ID=$(./skills/speclan-id-generator/scripts/generate-id.sh feature speclan)
-REQ_ID=$(./skills/speclan-id-generator/scripts/generate-id.sh requirement speclan)
-\`\`\`
-```
-
-### With Agents
-
-Agents should reference the inline algorithm from this skill when they need to suggest ID generation code.
+- `MISSING_TYPE` — `--type` flag not provided
+- `INVALID_TYPE` — Unknown entity type
+- `PARENT_NOT_FOUND` — `--parent` ID not found on disk
+- `INVALID_PARENT` — Parent type not valid for the requested entity type
+- `ID_GENERATION_FAILED` — ID space exhausted or collision loop

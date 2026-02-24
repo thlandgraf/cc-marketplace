@@ -24,7 +24,7 @@ draft | review | approved | in-development | under-test | released | deprecated
 ### Type Values
 
 ```
-goal | feature | requirement | scenario | acceptanceCriterion | test | template | changeRequest
+goal | feature | requirement | template | changeRequest
 ```
 
 ---
@@ -38,16 +38,6 @@ Strategic objectives that features contribute to achieving.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `contributors` | FeatureId[] | No | Features contributing to this goal |
-| `metrics` | Metric[] | No | Success measurement criteria |
-
-### Metric Object
-
-```yaml
-metrics:
-  - name: "Inventory Management Efficiency"
-    target: "60% reduction in manual tasks"
-    unit: "percent"
-```
 
 ### Example Goal
 
@@ -64,13 +54,6 @@ contributors:
   - F-1049
   - F-2247
   - F-3344
-metrics:
-  - name: Inventory Management Efficiency
-    target: 60% reduction in manual tasks
-    unit: percent
-  - name: Sales Performance
-    target: 15% increase in transaction value
-    unit: percent
 ---
 ```
 
@@ -131,8 +114,7 @@ Requirements use **directory-based storage** (like features):
 features/F-####-parent/requirements/
 └── R-2046-health-check/
     ├── R-2046-health-check.md    # Requirement file
-    ├── change-requests/           # CRs for this requirement
-    └── scenarios/                 # Child scenarios
+    └── change-requests/           # CRs for this requirement
 ```
 
 ### Requirement-Specific Fields
@@ -140,7 +122,6 @@ features/F-####-parent/requirements/
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `feature` | FeatureId | Yes | Parent feature ID |
-| `scenarios` | ScenarioId[] | Yes | Validation scenarios (at least one) |
 
 ### Example Requirement
 
@@ -154,114 +135,6 @@ owner: Product Team
 created: "2025-12-29T08:09:34.064Z"
 updated: "2025-12-29T10:49:13.890Z"
 feature: F-1009
-scenarios:
-  - S-0001
-  - S-0002
----
-```
-
----
-
-## Scenario (S-####)
-
-Specific situations that validate a requirement.
-
-### Scenario-Specific Fields
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `requirement` | RequirementId | Yes | Parent requirement ID |
-| `acceptanceCriteria` | ACId[] | Yes | Acceptance criteria (at least one) |
-
-### Example Scenario
-
-```yaml
----
-id: S-0001
-type: scenario
-title: Attempt to add quarantined pet to cart
-status: draft
-owner: QA Team
-created: "2025-12-29T08:10:00.000Z"
-updated: "2025-12-29T08:10:00.000Z"
-requirement: R-0001
-acceptanceCriteria:
-  - AC-0001
-  - AC-0002
----
-```
-
----
-
-## AcceptanceCriterion (AC-####)
-
-Specific conditions that must be met for a scenario to pass.
-
-### AcceptanceCriterion-Specific Fields
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `scenario` | ScenarioId | Yes | Parent scenario ID |
-| `tests` | TestId[] | Yes | Linked tests (at least one) |
-
-### Example AcceptanceCriterion
-
-```yaml
----
-id: AC-0001
-type: acceptanceCriterion
-title: System displays error message for quarantined pet
-status: draft
-owner: QA Team
-created: "2025-12-29T08:11:00.000Z"
-updated: "2025-12-29T08:11:00.000Z"
-scenario: S-0001
-tests:
-  - T-0001
----
-```
-
----
-
-## Test (T-####)
-
-Verification procedures for acceptance criteria.
-
-### Test-Specific Fields
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `criterion` | ACId | Yes | Parent acceptance criterion ID |
-| `kind` | string | Yes | `automated` or `manual` |
-| `framework` | string | No | Test framework (Jest, Mocha, etc.) |
-| `ref` | TestRef | No | Code reference |
-
-### TestRef Object
-
-```yaml
-ref:
-  repo: "https://github.com/org/repo"  # Optional
-  path: "tests/pet-sales.spec.ts"       # Required if ref exists
-  selector: "describe('Pet Sales')"     # Optional
-```
-
-### Example Test
-
-```yaml
----
-id: T-0001
-type: test
-title: Verify quarantine check on cart add
-status: draft
-owner: QA Team
-created: "2025-12-29T08:12:00.000Z"
-updated: "2025-12-29T08:12:00.000Z"
-criterion: AC-0001
-kind: automated
-framework: Jest
-ref:
-  path: "tests/pet-sales.spec.ts"
-  selector: "it('blocks quarantined pets')"
 ---
 ```
 
@@ -275,7 +148,7 @@ Reusable specification templates.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `templateFor` | string | Yes | Entity type this templates: feature, requirement, scenario, acceptanceCriterion, test |
+| `templateFor` | string | Yes | Entity type this templates: feature, requirement |
 | `description` | string | No | Template description |
 | `sections` | string[] | No | Template sections/headings |
 | `isSystemTemplate` | boolean | No | Built-in vs custom template |
@@ -355,9 +228,6 @@ changes: |
 | Goal | G-### | `^G-\d{3}$` |
 | Feature | F-#### | `^F-\d{4}$` |
 | Requirement | R-#### | `^R-\d{4}$` |
-| Scenario | S-#### | `^S-\d{4}$` |
-| AcceptanceCriterion | AC-#### | `^AC-\d{4}$` |
-| Test | T-#### | `^T-\d{4}$` |
 | ChangeRequest | CR-#### | `^CR-\d{4}$` |
 | Template | UUID v4 | `^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$` |
 

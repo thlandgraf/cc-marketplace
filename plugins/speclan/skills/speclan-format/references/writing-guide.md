@@ -41,10 +41,7 @@ Every requirement should have clear, measurable acceptance criteria.
 
 **Good:**
 ```markdown
-Given a pet with status QUARANTINE
-When a user attempts to add it to cart
-Then the system displays error "Pet not available for sale"
-And the cart remains unchanged
+- [ ] Given a pet with status QUARANTINE, when a user attempts to add it to cart, then the system displays error "Pet not available for sale" and the cart remains unchanged
 ```
 
 **Avoid:**
@@ -58,11 +55,8 @@ Maintain clear links between entities in the hierarchy.
 
 ```
 Goal G-087 (Animal Welfare)
-  └── Feature F-049 (Pet Management)
+  └── Feature F-1049 (Pet Management)
         └── Requirement R-0001 (No quarantine sales)
-              └── Scenario S-0001 (Cart add attempt)
-                    └── AC-0001 (Error displayed)
-                          └── Test T-0001 (Automated check)
 ```
 
 ---
@@ -94,7 +88,7 @@ Goals define strategic business objectives.
 ### Tips
 
 - Focus on business outcomes, not technical solutions
-- Include quantifiable metrics where possible
+- Include measurable success criteria where possible
 - Link to all contributing features
 - Keep goals broad enough to encompass multiple features
 
@@ -192,15 +186,9 @@ Requirements specify conditions that must be satisfied.
 
 ## Acceptance Criteria
 
-### Scenario 1: [Scenario name]
-**Given** [initial state]
-**When** [action]
-**Then** [expected outcome]
-
-### Scenario 2: [Scenario name]
-**Given** [initial state]
-**When** [action]
-**Then** [expected outcome]
+- [ ] Given [precondition], when [action], then [expected outcome]
+- [ ] Given [precondition], when [action], then [expected outcome]
+- [ ] Given [alternative precondition], when [action], then [expected outcome]
 
 ## Edge Cases
 - [Edge case 1 and expected behavior]
@@ -214,10 +202,21 @@ Requirements specify conditions that must be satisfied.
 - [Link to related features]
 ```
 
+### Checkbox States for Acceptance Criteria
+
+| Syntax | Meaning |
+|--------|---------|
+| `[ ]` | Open / unchecked |
+| `[x]` | Done / verified |
+| `[~]` | In progress |
+| `[>]` | Deferred |
+| `[-]` | Canceled |
+| `[!]` | Important |
+
 ### Tips
 
 - Start with a clear, one-line requirement statement
-- Use Given/When/Then format for scenarios
+- Use checkbox lists with Given/When/Then logic for acceptance criteria
 - Document edge cases explicitly
 - Include rationale to explain the "why"
 
@@ -240,125 +239,6 @@ Implement validation in the checkout flow.  # Implementation detail
 
 Make sure pets can't be sold when they shouldn't be.  # Ambiguous
 ```
-
----
-
-## Writing Scenarios
-
-Scenarios describe specific situations for validation.
-
-### Structure
-
-```markdown
----
-[YAML frontmatter]
----
-
-## Context
-[Background context for this scenario]
-
-## Steps
-
-**Given** [precondition 1]
-**And** [precondition 2]
-
-**When** [action taken]
-**And** [additional action if needed]
-
-**Then** [expected outcome 1]
-**And** [expected outcome 2]
-
-## Test Data
-| Field | Value |
-|-------|-------|
-| [field] | [value] |
-
-## Notes
-[Additional context or edge case considerations]
-```
-
-### Tips
-
-- One scenario per specific situation
-- Use concrete test data
-- Keep steps atomic and testable
-- Reference any required preconditions
-
----
-
-## Writing Acceptance Criteria
-
-Acceptance criteria define specific conditions for scenario success.
-
-### Structure
-
-```markdown
----
-[YAML frontmatter]
----
-
-## Criterion
-[Clear, testable statement of what must be true]
-
-## Verification Method
-[How this criterion will be verified]
-
-## Expected Behavior
-| Condition | Expected Result |
-|-----------|-----------------|
-| [condition] | [result] |
-```
-
-### Tips
-
-- One clear condition per criterion
-- Must be objectively verifiable
-- Include expected behavior table for complex criteria
-
----
-
-## Writing Tests
-
-Tests document verification procedures.
-
-### Structure
-
-```markdown
----
-[YAML frontmatter]
----
-
-## Test Description
-[What this test verifies]
-
-## Prerequisites
-- [Prerequisite 1]
-- [Prerequisite 2]
-
-## Test Steps
-1. [Step 1]
-2. [Step 2]
-3. [Step 3]
-
-## Expected Results
-- [Expected result 1]
-- [Expected result 2]
-
-## Code Reference
-[Link to automated test if applicable]
-```
-
-### Automated vs Manual
-
-**Automated tests:**
-- Include `kind: automated` in frontmatter
-- Reference test file and selector
-- Document test framework
-
-**Manual tests:**
-- Include `kind: manual` in frontmatter
-- Detailed step-by-step instructions
-- Clear pass/fail criteria
 
 ---
 
@@ -393,15 +273,12 @@ The system responds to search queries within 500ms for 95th percentile.
 
 **Wrong:**
 ```markdown
-# Requirement without linking to feature or scenarios
+# Requirement without linking to parent feature
 ```
 
 **Right:**
 ```yaml
-feature: F-049
-scenarios:
-  - S-0001
-  - S-0002
+feature: F-1049
 ```
 
 ### 4. Incomplete Edge Cases

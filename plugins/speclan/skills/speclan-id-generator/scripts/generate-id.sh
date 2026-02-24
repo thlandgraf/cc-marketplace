@@ -5,8 +5,7 @@
 #
 # Usage: ./generate-id.sh <entity-type> [count] [speclan-dir]
 #
-# Entity types: goal, feature, requirement, change-request, scenario,
-#               acceptance-criterion, test
+# Entity types: goal, feature, requirement, change-request
 #
 # Output: Unique ID(s) to stdout, one per line
 # Exit codes: 0 = success, 1 = error
@@ -29,9 +28,6 @@ Entity types:
   feature              F-#### (4 digits, 1000-9999)
   requirement          R-#### (4 digits, 1000-9999)
   change-request       CR-#### (4 digits, 1000-9999)
-  scenario             S-#### (4 digits, 1000-9999)
-  acceptance-criterion AC-#### (4 digits, 1000-9999)
-  test                 T-#### (4 digits, 1000-9999)
 
 Arguments:
   entity-type   Required. One of the types listed above.
@@ -65,15 +61,6 @@ get_entity_config() {
       ;;
     change-request)
       echo "CR-:4:1000:9999"
-      ;;
-    scenario)
-      echo "S-:4:1000:9999"
-      ;;
-    acceptance-criterion)
-      echo "AC-:4:1000:9999"
-      ;;
-    test)
-      echo "T-:4:1000:9999"
       ;;
     *)
       echo ""
@@ -242,7 +229,7 @@ main() {
   if [ -z "$config" ]; then
     echo "ERROR: Invalid entity type: $entity_type" >&2
     echo "" >&2
-    echo "Valid types: goal, feature, requirement, change-request, scenario, acceptance-criterion, test" >&2
+    echo "Valid types: goal, feature, requirement, change-request" >&2
     exit 1
   fi
 
