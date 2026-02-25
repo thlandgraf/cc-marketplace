@@ -30,7 +30,7 @@ Fast, flexible querying of SPECLAN entities with JSON output. Query by type, fil
 ### Script Location
 
 ```
-${PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh
+${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh
 ```
 
 ### Command Line
@@ -173,7 +173,7 @@ The `--parent` flag checks multiple locations:
 
 ```bash
 # Index existing features
-FEATURES_JSON=$("${PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" --type feature --full speclan)
+FEATURES_JSON=$("${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" --type feature --full speclan)
 
 # Check if feature exists
 if echo "$FEATURES_JSON" | grep -q '"id":"F-1049"'; then
@@ -181,7 +181,7 @@ if echo "$FEATURES_JSON" | grep -q '"id":"F-1049"'; then
 fi
 
 # Get editable features (not locked)
-EDITABLE=$("${PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" --type feature --filter-status draft speclan)
+EDITABLE=$("${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" --type feature --filter-status draft speclan)
 ```
 
 ### Extract specific fields with grep

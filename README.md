@@ -6,7 +6,10 @@ Claude Code plugins for specification-driven development, project governance, an
 
 ### SPECLAN
 
-Claude Code helper for the [SPECLAN](https://github.com/digital-dividend/speclan) VSCode extension - manage project specifications as interlinked markdown files.
+
+Claude Code helper for the [SPECLAN](https://marketplace.visualstudio.com/items?itemName=DigitalDividend.speclan-vscode-extension) VSCode extension - manage project specifications as interlinked markdown files.
+
+![Speclan](plugin-banner.gif)
 
 #### Capabilities
 
