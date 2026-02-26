@@ -1,12 +1,15 @@
 #!/bin/bash
-# Guard locked SPECLAN specs from direct modification
-# Blocks Write/Edit on Features and Requirements with locked status:
-# - deprecated: NEVER writable, frozen permanently
-# - in-development, under-test, released: require a Change Request (CR-####)
-#   in the entity's change-requests/ directory
+# Guard SPECLAN specs from invalid modifications
+#
+# Two guards:
+# 1. Invalid status: Blocks setting status to any value not in the valid SPECLAN lifecycle
+#    Applies to ALL files under speclan/ (features, requirements, change requests)
+# 2. Locked specs: Blocks Write/Edit on Features and Requirements with locked status
+#    (deprecated, in-development, under-test, released)
 
 # Read hook input from stdin
 INPUT=$(cat) || true
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // ""' 2>/dev/null) || TOOL_NAME=""
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""' 2>/dev/null) || FILE_PATH=""
 
 # Only check files under PROJECTROOT/speclan/
@@ -16,6 +19,34 @@ if [[ "$FILE_PATH" != "${SPECLAN_ROOT}"* ]]; then
   exit 0
 fi
 
+# --- Guard 1: Invalid status values ---
+# Extract the new content being written
+if [[ "$TOOL_NAME" == "Edit" ]]; then
+  NEW_CONTENT=$(echo "$INPUT" | jq -r '.tool_input.new_string // ""' 2>/dev/null) || NEW_CONTENT=""
+elif [[ "$TOOL_NAME" == "Write" ]]; then
+  NEW_CONTENT=$(echo "$INPUT" | jq -r '.tool_input.content // ""' 2>/dev/null) || NEW_CONTENT=""
+else
+  NEW_CONTENT=""
+fi
+
+# Check if the edit introduces a status: field with an invalid value
+if [[ -n "$NEW_CONTENT" ]]; then
+  NEW_STATUS=$(echo "$NEW_CONTENT" | grep -m1 '^status:' | sed 's/^status:[ ]*//' | sed "s/^[\"']//;s/[\"']$//" | sed 's/[ \t]*$//')
+
+  if [[ -n "$NEW_STATUS" ]]; then
+    case "$NEW_STATUS" in
+      draft|review|approved|in-development|under-test|released|deprecated)
+        # Valid status, continue to next guard
+        ;;
+      *)
+        echo "{\"hookSpecificOutput\":{\"permissionDecision\":\"deny\"},\"systemMessage\":\"BLOCKED: '${NEW_STATUS}' is not a valid SPECLAN status. Valid statuses: draft, review, approved, in-development, under-test, released, deprecated. Do NOT change spec statuses during review — they remain as-is.\"}"
+        exit 0
+        ;;
+    esac
+  fi
+fi
+
+# --- Guard 2: Locked spec statuses ---
 # Only check Feature and Requirement files (F-####-*.md or R-####-*.md)
 BASENAME=$(basename "$FILE_PATH" 2>/dev/null)
 if [[ ! "$BASENAME" =~ ^(F|R)-[0-9]+-.*\.md$ ]]; then

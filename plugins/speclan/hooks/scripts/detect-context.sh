@@ -92,72 +92,44 @@ while [[ "$current" != "/" ]]; do
 done
 
 if [[ -n "$speclan_dir" ]]; then
-    output+="## SPECLAN Project Detected\n\n"
-    output+="**Speclan Directory:** \`$speclan_dir\`\n\n"
-
     # Persist to environment
     env_output+="export SPECLAN_DIR=\"$speclan_dir\"\n"
 
-    # Count specifications
-    goals=$(count_specs "$speclan_dir" "goals" "G-*.md")
-    features=$(count_specs "$speclan_dir" "features" "F-*.md")
-    requirements=$(count_specs "$speclan_dir" "requirements" "R-*.md")
-
     # Count by status
-    approved=$(count_by_status "$speclan_dir" "approved")
     draft=$(count_by_status "$speclan_dir" "draft")
-    in_dev=$(count_by_status "$speclan_dir" "in-development")
+    review=$(count_by_status "$speclan_dir" "review")
+    approved=$(count_by_status "$speclan_dir" "approved")
 
-    output+="### Specification Summary\n\n"
-    output+="| Entity | Count |\n"
-    output+="|--------|-------|\n"
-    output+="| Goals | $goals |\n"
-    output+="| Features | $features |\n"
-    output+="| Requirements | $requirements |\n"
-    output+="\n"
+    output+="SPECLAN Project ($draft draft, $review review, $approved approved)"
 
-    output+="### Status Distribution\n\n"
-    output+="| Status | Count |\n"
-    output+="|--------|-------|\n"
-    output+="| Approved | $approved |\n"
-    output+="| Draft | $draft |\n"
-    output+="| In Development | $in_dev |\n"
-    output+="\n"
+    # Check if rules file is installed
+    rules_found=false
+    for rules_dir in "$PROJECT_DIR/.claude/rules" "$current/.claude/rules"; do
+        if ls "$rules_dir"/speclan*.md &>/dev/null; then
+            rules_found=true
+            break
+        fi
+    done
+    if [[ "$rules_found" == false ]]; then
+        output+="\nWARN: No .claude/rules/speclan.md found. Add a path-restricted rules file for SPECLAN format guidance."
+    fi
 
-    env_output+="export SPECLAN_GOALS_COUNT=\"$goals\"\n"
-    env_output+="export SPECLAN_FEATURES_COUNT=\"$features\"\n"
-    env_output+="export SPECLAN_REQUIREMENTS_COUNT=\"$requirements\"\n"
+    env_output+="export SPECLAN_DRAFT_COUNT=\"$draft\"\n"
+    env_output+="export SPECLAN_REVIEW_COUNT=\"$review\"\n"
     env_output+="export SPECLAN_APPROVED_COUNT=\"$approved\"\n"
-else
-    output+="## No SPECLAN Directory Found\n\n"
-    output+="This project does not appear to have a SPECLAN specification directory.\n"
-    output+="To use SPECLAN, create a \`speclan/\` directory with \`goals/\`, \`features/\`, and \`requirements/\` subdirectories.\n\n"
+
+    # Check optional plugin dependencies
+    if check_plugin_installed "speckit"; then
+        env_output+="export SPECLAN_HAS_SPECKIT=\"true\"\n"
+    else
+        env_output+="export SPECLAN_HAS_SPECKIT=\"false\"\n"
+    fi
+    if check_plugin_installed "feature-dev"; then
+        env_output+="export SPECLAN_HAS_FEATURE_DEV=\"true\"\n"
+    else
+        env_output+="export SPECLAN_HAS_FEATURE_DEV=\"false\"\n"
+    fi
 fi
-
-# Check for optional plugin dependencies
-output+="### Plugin Dependencies\n\n"
-output+="| Plugin | Status |\n"
-output+="|--------|--------|\n"
-
-# Check speckit
-if check_plugin_installed "speckit"; then
-    output+="| speckit | Installed |\n"
-    env_output+="export SPECLAN_HAS_SPECKIT=\"true\"\n"
-else
-    output+="| speckit | Not installed |\n"
-    env_output+="export SPECLAN_HAS_SPECKIT=\"false\"\n"
-fi
-
-# Check feature-dev
-if check_plugin_installed "feature-dev"; then
-    output+="| feature-dev | Installed |\n"
-    env_output+="export SPECLAN_HAS_FEATURE_DEV=\"true\"\n"
-else
-    output+="| feature-dev | Not installed |\n"
-    env_output+="export SPECLAN_HAS_FEATURE_DEV=\"false\"\n"
-fi
-
-output+="\n"
 
 # Persist environment variables if CLAUDE_ENV_FILE is available
 if [[ -n "${CLAUDE_ENV_FILE:-}" ]]; then
@@ -165,11 +137,20 @@ if [[ -n "${CLAUDE_ENV_FILE:-}" ]]; then
 fi
 
 # Output context for Claude as systemMessage JSON
-json_output=$(echo -e "$output" | jq -Rs . 2>/dev/null || echo '"SPECLAN context detection completed."')
-cat << EOF
+if [[ -n "$output" ]]; then
+    json_output=$(echo -e "$output" | jq -Rs . 2>/dev/null || echo '"SPECLAN context detection completed."')
+    cat << EOF
 {
   "continue": true,
   "suppressOutput": false,
   "systemMessage": ${json_output}
 }
 EOF
+else
+    cat << 'EOF'
+{
+  "continue": true,
+  "suppressOutput": true
+}
+EOF
+fi

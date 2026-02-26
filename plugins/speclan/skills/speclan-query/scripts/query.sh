@@ -130,7 +130,7 @@ get_entity_config() {
       echo "F-*.md:features"
       ;;
     requirement)
-      echo "R-*.md:requirements"
+      echo "R-*.md:features"
       ;;
     change-request)
       echo "CR-*.md:."

@@ -116,3 +116,21 @@ Error: [plugin] plugin is not installed.
 
 Install with: [installation instructions]
 ```
+
+### 7. Check Rules Setup
+
+Check if a SPECLAN rules file exists in `.claude/rules/`:
+
+```bash
+ls .claude/rules/speclan*.md 2>/dev/null
+```
+
+If missing, show:
+```
+### Rules Setup
+
+No SPECLAN rules file found in .claude/rules/.
+
+For path-restricted format guidance, add a speclan.md rule file to .claude/rules/
+with paths: ["speclan/**/*.md"] frontmatter. See https://github.com/user/speclan for the standard template.
+```

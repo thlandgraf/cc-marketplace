@@ -2,6 +2,8 @@
 
 Claude Code plugins for specification-driven development, project governance, and task management.
 
+This repo is intended to be cloned and customized to fit your software development process. Fork it, adjust the plugins to match your workflows, and use it as a starting point rather than a fixed dependency.
+
 ## Plugins
 
 ### SPECLAN
@@ -29,6 +31,9 @@ Claude Code helper for the [SPECLAN](https://marketplace.visualstudio.com/items?
 | `/speclan:implement` | Implement approved Features using feature-dev |
 | `/speclan:from-speckit` | Convert speckit specs to SPECLAN format |
 | `/speclan:to-speckit` | Inject approved SPECLAN Features into speckit |
+| `/speclan:plan-manual` | Create a manual implementation plan from approved specs |
+| `/speclan:implement-manual` | Implement the next pending item from a manual plan |
+| `/speclan:review-manual` | Review all in-review items, verify spec compliance and code quality |
 
 #### Agents
 
@@ -38,6 +43,8 @@ Claude Code helper for the [SPECLAN](https://marketplace.visualstudio.com/items?
 | `requirement-verifier` | Verify individual requirements are satisfied by code |
 | `implementation-order` | Analyze feature dependencies and determine optimal build order |
 | `spec-converter` | Bidirectional conversion between speckit and SPECLAN formats |
+| `code-hygiene-reviewer` | Review code structure, naming, duplication, dead code, type safety |
+| `architecture-reviewer` | Review design patterns, SOLID principles, coupling, module boundaries |
 
 #### Skills
 
@@ -47,6 +54,9 @@ Claude Code helper for the [SPECLAN](https://marketplace.visualstudio.com/items?
 | `speclan-query` | Query specs by type, status, or parent relationship (JSON output) |
 | `speclan-id-generator` | Collision-free random ID generation for SPECLAN entities |
 | `sync-from-session` | Workflow for capturing session work as SPECLAN specs |
+| `plan-manual` | Create manual implementation plans from approved specs |
+| `implement-manual` | Implement next item from a manual plan (plan → implement → review) |
+| `review-manual` | Review all in-review items, verify spec compliance and code quality |
 
 #### Hooks
 
@@ -54,7 +64,28 @@ Claude Code helper for the [SPECLAN](https://marketplace.visualstudio.com/items?
 |-------|----------|
 | `SessionStart` | Detects speclan/ directory, counts specs, checks plugin dependencies |
 | `PreToolUse` (Read/Write/Edit) | Auto-injects SPECLAN format knowledge when accessing spec files |
-| `PreToolUse` (Write/Edit) | Guards locked specs - blocks direct edits to in-development/released/deprecated entities |
+| `PreToolUse` (Write/Edit) | Guards locked specs - blocks direct edits to in-development/released/deprecated entities, rejects invalid status values |
+
+#### Manual Implementation Flow
+
+Three-phase workflow for implementing approved specs with human oversight at each stage:
+
+```
+/speclan:plan-manual → /speclan:implement-manual → /speclan:review-manual
+```
+
+**1. Plan** — `/speclan:plan-manual` queries all approved specs and generates a plan file at `speclan/.local/plans/`. The plan is a pure-data checklist with checkbox states tracking progress. Only approved items and their ancestor chain are included.
+
+**2. Implement** — `/speclan:implement-manual` picks up the plan file and implements the next `[ ]` item. Run repeatedly — each invocation implements one feature (with all its requirements) or one individual item. Checkboxes transition: `[ ]` → `[~]` → `[?]`.
+
+**3. Review** — `/speclan:review-manual` reviews ALL `[?]` items at once, verifying spec compliance (acceptance criteria) and code quality (hygiene + architecture subagents). On acceptance, checkboxes transition `[?]` → `[x]`.
+
+```
+Plan file checkboxes:  [ ] pending → [~] in-dev → [?] in-review → [x] done
+Spec statuses:         approved → in-development → under-test (unchanged by review)
+```
+
+Spec files are read-only during review — status transitions to `released` happen after human testing.
 
 #### Entity Hierarchy
 
