@@ -21,7 +21,7 @@ The `implement-manual` skill transitions checkboxes through these states:
 
 ## Pre-Checking Logic
 
-When the plan is created, items are included based on their spec status and relationship to approved items:
+**The checkbox is determined by the spec's `status:` field.** Read each spec's status and assign:
 
 | Spec Status | Plan Checkbox | Included When |
 |---|---|---|
@@ -30,7 +30,9 @@ When the plan is created, items are included based on their spec status and rela
 | `under-test` | `[x]` | Only as ancestor of an approved item |
 | `released` | `[x]` | Only as ancestor of an approved item |
 
-Non-approved items without approved descendants are **excluded** from the plan. This keeps the plan focused on actionable work.
+**Only `approved` specs get `[ ]`. All other statuses get `[x]`.** Never mark a non-approved spec as `[ ]`.
+
+Non-approved items without approved descendants are **excluded** from the plan.
 
 ## Structure — Three Levels
 

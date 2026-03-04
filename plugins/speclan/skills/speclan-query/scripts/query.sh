@@ -19,6 +19,7 @@ DEFAULT_SPECLAN_DIR="./speclan"
 # Global variables (avoiding zsh reserved words)
 entity_type=""
 filter_status_value=""
+filter_id_value=""
 parent_id=""
 full_mode=false
 speclan_dir=""
@@ -36,6 +37,7 @@ Options:
   -s, --filter-status STATUS   Filter by status (reads frontmatter)
                                Values: draft, review, approved, in-development,
                                        under-test, released, deprecated
+  -i, --filter-id ID           Filter by entity ID (e.g., F-1234, R-5678)
   -p, --parent ID              Filter by parent ID (e.g., F-1234)
   -f, --full                   Include title and status in output (reads frontmatter)
   -h, --help                   Show this help
@@ -51,6 +53,7 @@ Examples:
   query.sh --type feature --full
   query.sh --type feature --filter-status approved
   query.sh --type requirement --parent F-1049
+  query.sh --type feature --filter-id F-1234 --full
   query.sh --type all ./speclan
 
 EOF
@@ -75,6 +78,14 @@ parse_args() {
           usage
         fi
         filter_status_value="$2"
+        shift 2
+        ;;
+      -i|--filter-id)
+        if [[ -z "$2" || "$2" == -* ]]; then
+          echo "ERROR: --filter-id requires an argument" >&2
+          usage
+        fi
+        filter_id_value="$2"
         shift 2
         ;;
       -p|--parent)
@@ -406,6 +417,11 @@ query_single_type() {
     local id slug
     id=$(echo "$parsed" | cut -d'|' -f1)
     slug=$(echo "$parsed" | cut -d'|' -f2)
+
+    # Apply ID filter (fast, before frontmatter reads)
+    if [[ -n "$filter_id_value" ]] && [[ "$id" != "$filter_id_value" ]]; then
+      continue
+    fi
 
     # Infer type from ID if querying 'all'
     local file_type="$etype"
