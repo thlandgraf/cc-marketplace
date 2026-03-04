@@ -14,6 +14,7 @@ Complete YAML frontmatter field reference for all SPECLAN entity types.
 | `created` | ISO-8601 | Yes | Creation timestamp |
 | `updated` | ISO-8601 | Yes | Last modification timestamp |
 | `tags` | string[] | No | Classification tags |
+| `source` | string | No | Import provenance (e.g., `"bmad:FR23"`, `"speckit:001:FR-001"`). Set by converters on import. Enables re-import matching. |
 
 ### Status Values
 

@@ -129,6 +129,26 @@ if [[ -n "$speclan_dir" ]]; then
     else
         env_output+="export SPECLAN_HAS_FEATURE_DEV=\"false\"\n"
     fi
+
+    # Check for BMAD-METHOD installation
+    if [[ -d "$PROJECT_DIR/_bmad" ]] && [[ -d "$PROJECT_DIR/_bmad/bmm" ]]; then
+        env_output+="export SPECLAN_HAS_BMAD=\"true\"\n"
+        # Check for existing BMAD planning artifacts
+        if [[ -d "$PROJECT_DIR/_bmad-output/planning-artifacts" ]]; then
+            local prd_count
+            prd_count=$(find "$PROJECT_DIR/_bmad-output/planning-artifacts" -iname "prd*" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+            if [[ "$prd_count" -gt 0 ]]; then
+                env_output+="export SPECLAN_BMAD_HAS_PRD=\"true\"\n"
+            else
+                env_output+="export SPECLAN_BMAD_HAS_PRD=\"false\"\n"
+            fi
+        else
+            env_output+="export SPECLAN_BMAD_HAS_PRD=\"false\"\n"
+        fi
+    else
+        env_output+="export SPECLAN_HAS_BMAD=\"false\"\n"
+        env_output+="export SPECLAN_BMAD_HAS_PRD=\"false\"\n"
+    fi
 fi
 
 # Persist environment variables if CLAUDE_ENV_FILE is available

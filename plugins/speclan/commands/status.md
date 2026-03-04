@@ -27,9 +27,10 @@ If not found, display error with setup instructions.
 
 ### 2. Check Plugin Dependencies
 
-Check if optional plugins are installed:
+Check if optional plugins/tools are installed:
 - **speckit** - Required for `/speclan:from-speckit` and `/speclan:to-speckit`
 - **feature-dev** - Required for `/speclan:implement`
+- **BMAD-METHOD** - Check for `_bmad/` directory and `_bmad/bmm/config.yaml`. Required for `/speclan:from-bmad`, `/speclan:to-bmad`, and `/speclan:to-bmad-prd`. Also check if `_bmad-output/planning-artifacts/` contains a PRD.
 
 Display installation status for each.
 
@@ -89,6 +90,7 @@ Present as formatted tables:
 |--------|--------|--------------|
 | speckit | Installed/Missing | from-speckit, to-speckit |
 | feature-dev | Installed/Missing | implement |
+| BMAD-METHOD | Installed/Missing | from-bmad, to-bmad, to-bmad-prd |
 
 ### Coverage
 | Metric | Value |

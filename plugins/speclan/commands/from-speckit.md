@@ -104,6 +104,13 @@ Convert speckit elements to a **3-level hierarchy**:
 
 8. **IDs MUST be globally unique** — Never generate IDs for multiple child features in a single batch without writing the previous batch's files to disk first. The ID generator's collision detection only works against files already on disk. Generate → write → generate → write, one child feature at a time.
 
+9. **Implementation-agnostic specs** — Strip technology names, file paths, library references, and architecture decisions. SPECLAN specs describe WHAT, never HOW. This applies to ALL entities including goals and success indicators.
+   - **Strip**: specific runtime names, framework names, package managers, library names, specific file paths
+   - **Replace with generic terms**: "target runtime" (not a specific version), "package manager" (not a specific tool)
+   - **Allowed**: Domain-specific standards that ARE the requirement (e.g., "ANSI colors", "Unicode block elements")
+
+10. **No empty child features** — Every child feature MUST have at least one requirement. If a speckit user story or PART section has no FRs, either: (a) decompose the scope items into individual requirements, or (b) merge into a sibling child feature. Never create a child feature with `requirements: []`.
+
 ### 5. Identify Child Feature Groupings
 
 Before generating files, analyze each spec.md to identify child feature boundaries:
@@ -186,6 +193,7 @@ updated: [current date]
 goals: []  # Updated in Goal Creation step
 depends-on: [F-XXXX]  # Previous phase's parent feature (omit for first phase)
 tags: [phase-N]
+source: "speckit:001-phase-name"  # speckit phase directory name
 ---
 ```
 
@@ -226,6 +234,7 @@ updated: [current date]
 goals: []  # Updated in Goal Creation step
 requirements: [R-XXXX, R-XXXX, ...]
 tags: [priority-p1]
+source: "speckit:001-phase-name:part-a"  # or :us1-us3 for story groups
 ---
 ```
 
@@ -244,6 +253,7 @@ owner: [OWNER from git config]
 created: [current]
 updated: [current]
 feature: F-YYYY
+source: "speckit:001-phase-name:FR-001"  # speckit phase + FR number
 ---
 ```
 
@@ -255,7 +265,7 @@ CORRECT:  requirements/R-ZZZZ-slug/R-ZZZZ-slug.md
 WRONG:    requirements/R-ZZZZ-slug.md  ← flat file, NEVER do this
 ```
 
-**Body content:** Must start with `# Title`. Then: Description (plain language, no FR-### references), Acceptance Criteria (Given/When/Then checkboxes).
+**Body content:** Must start with `# Title`. Then: Description (plain language, no FR-### references), Acceptance Criteria (Given/When/Then checkboxes). Each acceptance criterion MUST be a single `- [ ]` line with Given/When/Then separated by semicolons (e.g., `- [ ] **Given** X; **When** Y; **Then** Z`). Multi-line format breaks markdown checkbox rendering.
 
 ### 9. Capture Phase Dependencies
 
@@ -291,6 +301,7 @@ updated: [current date]
 contributors:
   - F-XXXX
   - F-YYYY
+source: "speckit:goal-theme-slug"  # synthesized goal provenance
 ---
 ```
 
@@ -320,7 +331,47 @@ Derived from the full set of goals and features. Forward-looking, inspirational.
 Derived from the scope sections across all parent features. Present-tense, concrete.]
 ```
 
-### 12. Output Summary
+### 12. Cross-Link Entities
+
+After the full specification tree exists on disk, scan all generated files and insert inline relative markdown links wherever one spec's prose mentions functionality defined in another spec.
+
+**Step 1 — Build entity index:**
+
+Collect all generated entities into a lookup table:
+
+```
+{ title (lowercase) → relative file path from speclan/ }
+{ slug keywords → relative file path from speclan/ }
+```
+
+For each entity, index:
+- Full title (e.g., "Contact Roles")
+- Significant title fragments (e.g., "product separation", "billing workflow")
+- Do NOT index generic words ("Core", "System", "Management")
+
+**Step 2 — Scan and link:**
+
+For each generated `.md` file, scan the **body content only** (below the closing `---` of frontmatter):
+- Match mentions of other entities' titles or key phrases (case-insensitive)
+- Replace the **first occurrence** in each file with a relative markdown link
+- Compute the relative path from the current file's directory to the target file
+
+**Rules:**
+- **First mention only** — link the first occurrence per target per file, not every mention
+- **No self-links** — never link an entity to its own file
+- **Body only** — never modify frontmatter or the `# Title` H1 heading
+- **Don't nest links** — skip text already inside a markdown link `[...](...)`
+- **Relative paths** — always use relative paths, never absolute
+- **Parent ↔ child links** — parent feature bodies that mention child features should link to them, and vice versa
+- **Goal ↔ feature links** — goal "Contributing Features" lists should link to the feature files
+- **Cross-feature links** — "Out of Scope" sections that reference other features are prime link targets
+
+**Step 3 — Verify:**
+- Spot-check 3-5 files to confirm links resolve correctly
+- Confirm no links appear inside frontmatter
+- Confirm no self-links
+
+### 13. Output Summary
 
 ```
 ## Conversion Complete
@@ -358,13 +409,47 @@ speclan/
 3. Adjust child feature groupings if needed
 ```
 
-## Incremental Conversion
+## Re-Import (Incremental Conversion)
 
-If some specs already converted:
-- Detect existing SPECLAN entities by checking `speclan/features/` for phase-tagged features
-- Skip already-converted speckit specs
-- Only convert new or modified specs
-- Update existing specs if speckit changed
+When `speclan/features/` already contains entities, the command operates in **re-import mode**. Re-import respects the SPECLAN status lifecycle — editable specs are updated in place, locked specs get change requests.
+
+### Step 1: Build Provenance Index
+
+Grep `speclan/` for entities with `source: "speckit:` in their YAML frontmatter. Build a lookup table:
+
+```
+{ source-identifier → file-path, current-status }
+```
+
+If no `source:` fields are found but entities exist, warn the user that provenance tracking is not available and ask whether to proceed with a full re-import (skip/overwrite) or cancel.
+
+### Step 2: Match and Decide
+
+For each incoming speckit element, look up its source identifier in the provenance index:
+
+| Existing Status | Action |
+|---|---|
+| **Not found** | Create new entity (normal first-run flow with `source:` field) |
+| `draft` / `review` / `approved` | **Update in place** — overwrite body content, update `updated:` timestamp. Preserve `id`, `status`, `owner`, `created`. |
+| `in-development` / `under-test` / `released` | **Create Change Request** — generate a `CR-####` in the entity's `change-requests/` directory with `changeType: enhancement`, containing the updated content from speckit. |
+| `deprecated` | **Skip** — log a warning, do not touch the entity. |
+
+### Step 3: Detect Orphans
+
+After processing all incoming speckit elements, check for SPECLAN entities with `source: "speckit:*"` that were NOT matched. List orphans for user attention. Do NOT auto-delete.
+
+### Step 4: Re-Import Summary
+
+```
+### Re-Import Stats
+| Action | Count |
+|--------|-------|
+| Created (new) | X |
+| Updated (editable) | Y |
+| Change Requests (locked) | Z |
+| Skipped (deprecated) | W |
+| Orphaned (removed from source) | V |
+```
 
 ## Error Handling
 

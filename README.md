@@ -19,6 +19,8 @@ Claude Code helper for the [SPECLAN](https://marketplace.visualstudio.com/items?
 |------|-------------|
 | **Impl → Spec** | Sync session work to SPECLAN specifications |
 | **Spec → Impl** | Implement approved features using feature-dev |
+| **BMAD → Speclan** | Convert BMAD planning artifacts (PRD, Epics) to SPECLAN format |
+| **Speclan → BMAD** | Generate BMAD-standard PRD from approved specs (two approaches: BMAD-native or standalone converter) |
 | **Speckit → Speclan** | Convert speckit specifications to SPECLAN format |
 | **Speclan → Speckit** | Inject approved SPECLAN specs into speckit commands |
 
@@ -29,6 +31,9 @@ Claude Code helper for the [SPECLAN](https://marketplace.visualstudio.com/items?
 | `/speclan:status` | Check project setup, installed plugins, and spec statistics |
 | `/speclan:sync` | Sync session work to SPECLAN specs - identifies implemented features |
 | `/speclan:implement` | Implement approved Features using feature-dev |
+| `/speclan:from-bmad` | Convert BMAD planning artifacts (PRD, Epics, Architecture) to SPECLAN format |
+| `/speclan:to-bmad` | Generate BMAD-standard PRD using BMAD's native PRD creation workflow |
+| `/speclan:to-bmad-prd` | Generate BMAD-standard PRD using standalone converter (no BMAD skills required) |
 | `/speclan:from-speckit` | Convert speckit specs to SPECLAN format |
 | `/speclan:to-speckit` | Inject approved SPECLAN Features into speckit |
 | `/speclan:plan-manual` | Create a manual implementation plan from approved specs |
@@ -42,7 +47,8 @@ Claude Code helper for the [SPECLAN](https://marketplace.visualstudio.com/items?
 | `feature-verifier` | Deep 5-layer verification of feature implementation against specs |
 | `requirement-verifier` | Verify individual requirements are satisfied by code |
 | `implementation-order` | Analyze feature dependencies and determine optimal build order |
-| `spec-converter` | Bidirectional conversion between speckit and SPECLAN formats |
+| `bmad-converter` | Bidirectional conversion between BMAD-METHOD and SPECLAN formats |
+| `speckit-converter` | Bidirectional conversion between speckit and SPECLAN formats |
 | `code-hygiene-reviewer` | Review code structure, naming, duplication, dead code, type safety |
 | `architecture-reviewer` | Review design patterns, SOLID principles, coupling, module boundaries |
 
@@ -177,6 +183,7 @@ todo/
 | Dependency | Required By |
 |------------|-------------|
 | **feature-dev plugin** | `/speclan:implement` |
+| **BMAD-METHOD** | `/speclan:from-bmad`, `/speclan:to-bmad`, `/speclan:to-bmad-prd` |
 | **speckit plugin** | `/speclan:from-speckit`, `/speclan:to-speckit` |
 
 ## License
