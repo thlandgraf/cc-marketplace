@@ -6,7 +6,7 @@ description: >-
   "plan-manual", "show approved requirements", "prepare implementation plan",
   or wants to generate a plan file listing all approved SPECLAN requirements
   ready for manual implementation.
-version: 0.6.0
+version: 0.7.0
 ---
 
 # SPECLAN Plan Manual
@@ -22,7 +22,8 @@ The plan file is **pure data** — no embedded operational prompts. The `impleme
 3. Group children by parent, determine pre-check status
 4. Determine implementation order
 5. Create plan file
-6. Present summary to user
+6. Validate plan file
+7. Present summary to user
 
 ## Step 1: Detect Speclan Directory
 
@@ -83,26 +84,28 @@ Parent:    speclan/.../requirements/R-YYYY-.../R-YYYY-*.md
 
 ### 3c: Assemble the Tree
 
-| Item | Checkbox | Included When |
-|---|---|---|
-| Approved feature / requirement / CR | `[ ]` | Always — these are the items to implement |
-| Non-approved ancestor (feature or requirement) | `[x]` | Only as a direct ancestor of an approved item |
-| All other items | — | **Excluded** from the plan |
+**CRITICAL: The checkbox is determined by the spec's `status:` field, NOT by whether the item was in the query results.**
+
+For each item in the tree, assign the checkbox by reading its spec status:
+
+1. `status: approved` → `[ ]` (pending implementation)
+2. Any other status (`in-development`, `under-test`, `released`) → `[x]` (already past planning)
+
+**Only items with `status: approved` get `[ ]`.** Ancestors resolved in Step 3b are NOT approved — they MUST be `[x]`.
 
 **Do NOT include sibling items that have no approved descendants.**
 
 ### Example
 
-Given: F-0297 (`under-test`), R-0266 (`under-test`), R-1106 (`under-test`), R-1904 (`approved`), CR-5930 (`approved`, parent: R-1106):
+Given: F-8152 (`released`), R-5847 (`released`), CR-2630 (`approved`):
 
 ```
-- [x] [F-0297] SVG Rendering          ← ancestor of R-1904 and CR-5930
-  - [ ] [R-1904] Animation            ← approved
-  - [x] [R-1106] Size Reduction       ← ancestor of CR-5930
-    - [ ] [CR-5930] Small pills — CHANGE REQUEST: find and alter existing implementation
+- [x] [F-8152] Change Request Boxes   ← released, ancestor → [x]
+  - [x] [R-5847] Merge CR into Spec   ← released, ancestor → [x]
+    - [ ] [CR-2630] Also for under-test — CHANGE REQUEST: find and alter existing implementation
 ```
 
-R-0266 and other under-test requirements are **excluded** — they have no approved descendants.
+F-8152 and R-5847 are `[x]` because their status is NOT `approved`. Only CR-2630 is `[ ]` because its status IS `approved`. **Never mark a non-approved spec as `[ ]`.**
 
 ## Step 3b: Determine Implementation Order
 
@@ -145,13 +148,13 @@ mkdir -p "$SPECLAN_DIR/.local/plans"
 
 ### Filename
 
-Derive filename from the feature slug and current timestamp:
 ```
-speclan/.local/plans/{feature-slug}.{YYYY-MM-DDTHH-MM}.plan.md
+speclan/.local/plans/{slug}.{YYYY-MM-DDTHH-MM}.plan.md
 ```
 
-- **Single feature**: Use that feature's slug, truncated to 15 characters (e.g., `export-to-docum.2026-02-04T15-44.plan.md`)
-- **Multiple features**: Join truncated slugs with `+` (e.g., `svg-dependency+dependency-tabl.2026-02-25T14-30.plan.md`). Each slug max 15 characters.
+Characterize the plan's scope in exactly three hyphenated words as the slug. The slug should capture what the plan is about at a glance.
+
+Examples: `svg-graph-rendering`, `auth-flow-rework`, `news-help-assistant`, `table-export-fix`
 
 ### Plan File Format
 
@@ -159,9 +162,30 @@ speclan/.local/plans/{feature-slug}.{YYYY-MM-DDTHH-MM}.plan.md
 
 **CRITICAL: Follow the template in the reference file EXACTLY. Do NOT add operational prompts, code blocks, or your own wording. The plan file is a pure checklist.**
 
-## Step 5: Present Summary
+## Step 5: Validate Plan File
 
-After the plan file is written, display a summary:
+**Do NOT just re-read the plan file.** The plan file is the output being validated — it cannot validate itself. Instead, open each referenced spec file and compare its `status:` field against the checkbox in the plan.
+
+For each checkbox line in the plan:
+
+1. Extract the entity ID (e.g., `F-6089`, `R-5847`, `CR-2630`)
+2. Extract the spec file path from the `(...)` parentheses in the link sub-bullet below it
+3. **Read that spec file** using the Read tool — do NOT rely on any cached or in-memory data from earlier steps
+4. Extract the `status:` value from the spec's YAML frontmatter
+5. Compare: `status: approved` → checkbox MUST be `[ ]`, any other status → checkbox MUST be `[x]`
+
+If any mismatch is found, **fix it immediately** by editing the plan file. Then report the corrections:
+
+```
+Validation: fixed {count} checkbox(es):
+- {ID}: status is {status}, changed [ ] → [x]
+```
+
+If all checkboxes are correct, proceed silently.
+
+## Step 6: Present Summary
+
+After the plan file is validated, display a summary:
 
 ```
 ## Manual Implementation Plan Created

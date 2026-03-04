@@ -7,7 +7,7 @@ description: >-
   all in-review items from a manual implementation plan file. Picks up a
   plan file created by the plan-manual skill and reviews ALL [?] items
   at once, verifying spec compliance and code quality.
-version: 0.7.0
+version: 0.8.0
 ---
 
 # SPECLAN Review Manual
@@ -125,6 +125,18 @@ For every `[?]` item collected in Step 3, extract the spec file path from inside
 Read every spec file. Do NOT skip any.
 
 From each spec, extract all acceptance criteria — the `- [ ] Given...When...Then...` lines. These are the verification targets for Step 8.
+
+### Discover Specification Context
+
+After reading the item specs, discover and read the broader context to understand the system being reviewed:
+
+**Ancestors** — walk up the directory tree from each spec file path. Each parent directory matching `F-XXXX-*` or `R-XXXX-*` is an ancestor entity. Find and read its spec file (the `*.md` file with the same name as the directory). For example, given:
+```
+speclan/features/F-8512-speclannet/F-0212-online-help/F-1680-speclan-plugin/F-1680-speclan-plugin.md
+```
+The ancestors are F-8512 (speclannet) and F-0212 (online-help) — read both specs to understand the broader system context.
+
+**References** — scan each spec body for markdown links to other specs (e.g., `[R-1496](../R-1496-hover-tooltips/R-1496-hover-tooltips.md)`). Read referenced specs to understand cross-cutting concerns and dependencies relevant to the review.
 
 ## Step 6: Identify Implementation Files
 

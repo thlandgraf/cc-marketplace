@@ -6,7 +6,7 @@ description: >-
   "pick up the plan", "implement from plan", or wants to implement the next
   undone item from a manual implementation plan file. Picks up a plan
   file created by the plan-manual skill and implements items one at a time.
-version: 0.5.1
+version: 0.6.0
 ---
 
 # SPECLAN Implement Manual
@@ -194,6 +194,18 @@ Extract the path from inside the parentheses `(...)` of each link sub-bullet. Th
 2. The parent feature's spec (from the feature's link sub-bullet, for context)
 
 Do NOT skip any spec files. Every spec contains acceptance criteria and technical details essential for correct implementation.
+
+### Discover Specification Context
+
+After reading the item specs, discover and read the broader context to understand the system being built:
+
+**Ancestors** — walk up the directory tree from each spec file path. Each parent directory matching `F-XXXX-*` or `R-XXXX-*` is an ancestor entity. Find and read its spec file (the `*.md` file with the same name as the directory). For example, given:
+```
+speclan/features/F-8512-speclannet/F-0212-online-help/F-1680-speclan-plugin/F-1680-speclan-plugin.md
+```
+The ancestors are F-8512 (speclannet) and F-0212 (online-help) — read both specs to understand what system this feature belongs to and what "online-help" means in context.
+
+**References** — scan each spec body for markdown links to other specs (e.g., `[R-1496](../R-1496-hover-tooltips/R-1496-hover-tooltips.md)`). Read referenced specs to understand cross-cutting concerns, dependencies, and related functionality that the implementation must integrate with.
 
 ### Implement
 
