@@ -1,17 +1,15 @@
 ---
 name: SPECLAN Ask
 description: >-
-  This skill should be used when the user or an agent asks about a "spec",
-  "specification", "feature", "requirement", "change request", "goal", "CR",
-  "what is R-####", "what does F-#### do", "show me G-###", "tell me about",
-  "explain this feature", "status of", "who owns", "what depends on",
-  "children of", "parent of", "contributors to", "list requirements for",
-  "list features under", "what goals exist", "what's approved",
-  "what's in development", or references any SPECLAN entity by its ID pattern
-  (G-###, F-####, R-####, CR-####). This skill provides holistic, context-rich
-  answers by exploring entity relationships, hierarchy, status, and
-  cross-references rather than returning a single flat file.
-version: 0.1.0
+  Answer questions about SPECLAN specifications with full context — relationships,
+  hierarchy, status, and cross-references rather than just reading a single file.
+  Use whenever someone asks about a feature, requirement, goal, change request,
+  or references a SPECLAN entity ID (G-###, F-####, R-####, CR-####). Also use
+  when users ask about project status, what's ready to implement, dependency
+  chains, or want an overview of their spec hierarchy — even if they don't
+  explicitly say "SPECLAN" or "spec". Any question that needs context from the
+  speclan/ directory should route here.
+version: 0.2.0
 ---
 
 # SPECLAN Ask
@@ -136,12 +134,13 @@ Use these inline badges for compact status display:
 | released | `[released]` |
 | deprecated | `[deprecated]` |
 
-## Key Rules
+## Important Boundaries
 
-- **Never modify specs** — this skill is read-only. For modifications, direct the user to appropriate commands.
-- **ID from filename** — always extract entity IDs from the filename/dirname, not from frontmatter fields (authoritative rule from `speclan-format`).
-- **Respect hierarchy** — Goal → Feature → Requirement. Features can nest under features. Requirements are always leaves.
-- **Status awareness** — locked entities (in-development, under-test, released) require change requests to modify. Mention this when relevant.
+This skill is **read-only** — it answers questions but doesn't modify specs. If the user wants to change something, point them to the appropriate command or skill (e.g., `implement-manual` for implementation, or direct editing for draft-status specs). This separation matters because answering questions and making changes are different intents, and accidental modifications while exploring can be disruptive.
+
+Extract entity IDs from filenames/dirnames rather than frontmatter — the filename pattern `{PREFIX}-{ID}-{slug}` is the authoritative source of truth across all SPECLAN tools.
+
+The hierarchy flows Goal → Feature → Requirement, with features nesting under other features. Requirements are always leaf nodes. When locked entities (in-development, under-test, released) come up, mention that changes require a Change Request — this is often the most actionable piece of context for the user.
 
 ## Additional Resources
 

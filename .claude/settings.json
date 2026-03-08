@@ -1,6 +1,7 @@
 {
   "enabledPlugins": {
     "plugin-dev@claude-plugins-official": true,
-    "security-guidance@claude-code-plugins": true
+    "security-guidance@claude-code-plugins": true,
+    "skill-creator@claude-plugins-official": true
   }
 }

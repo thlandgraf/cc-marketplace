@@ -13,12 +13,15 @@ Claude Code helper for the [SPECLAN](https://marketplace.visualstudio.com/items?
 
 ![Speclan](plugin-banner.gif)
 
+> **Using BMAD?** See the [BMAD Integration Guide](BMAD.md) for a full walkthrough of the round-trip workflow between BMAD and SPECLAN.
+
 #### Capabilities
 
 | Flow | Description |
 |------|-------------|
+| **Ask** | Query specs with full context — hierarchy, relationships, status |
 | **Impl → Spec** | Sync session work to SPECLAN specifications |
-| **Spec → Impl** | Implement approved features using feature-dev |
+| **Spec → Impl** | Plan, implement, and review approved specs (manual three-phase workflow) |
 | **BMAD → Speclan** | Convert BMAD planning artifacts (PRD, Epics) to SPECLAN format |
 | **Speclan → BMAD** | Generate BMAD-standard PRD from approved specs (two approaches: BMAD-native or standalone converter) |
 | **Speckit → Speclan** | Convert speckit specifications to SPECLAN format |
@@ -28,17 +31,17 @@ Claude Code helper for the [SPECLAN](https://marketplace.visualstudio.com/items?
 
 | Command | Description |
 |---------|-------------|
+| `/speclan:ask` | Ask about any SPECLAN entity — get holistic context with hierarchy, relationships, and status |
 | `/speclan:status` | Check project setup, installed plugins, and spec statistics |
 | `/speclan:sync` | Sync session work to SPECLAN specs - identifies implemented features |
-| `/speclan:implement` | Implement approved Features using feature-dev |
+| `/speclan:plan-manual` | Create a manual implementation plan from approved specs |
+| `/speclan:implement-manual` | Implement the next pending item from a manual plan |
+| `/speclan:review-manual` | Review all in-review items, verify spec compliance and code quality |
 | `/speclan:from-bmad` | Convert BMAD planning artifacts (PRD, Epics, Architecture) to SPECLAN format |
 | `/speclan:to-bmad` | Generate BMAD-standard PRD using BMAD's native PRD creation workflow |
 | `/speclan:to-bmad-prd` | Generate BMAD-standard PRD using standalone converter (no BMAD skills required) |
 | `/speclan:from-speckit` | Convert speckit specs to SPECLAN format |
 | `/speclan:to-speckit` | Inject approved SPECLAN Features into speckit |
-| `/speclan:plan-manual` | Create a manual implementation plan from approved specs |
-| `/speclan:implement-manual` | Implement the next pending item from a manual plan |
-| `/speclan:review-manual` | Review all in-review items, verify spec compliance and code quality |
 
 #### Agents
 
@@ -59,6 +62,7 @@ Claude Code helper for the [SPECLAN](https://marketplace.visualstudio.com/items?
 | `speclan-format` | Foundational knowledge for all speclan/ file operations |
 | `speclan-query` | Query specs by type, status, or parent relationship (JSON output) |
 | `speclan-id-generator` | Collision-free random ID generation for SPECLAN entities |
+| `ask` | Answer spec questions with full context — hierarchy, relationships, status |
 | `sync-from-session` | Workflow for capturing session work as SPECLAN specs |
 | `plan-manual` | Create manual implementation plans from approved specs |
 | `implement-manual` | Implement next item from a manual plan (plan → implement → review) |
@@ -69,7 +73,6 @@ Claude Code helper for the [SPECLAN](https://marketplace.visualstudio.com/items?
 | Event | Behavior |
 |-------|----------|
 | `SessionStart` | Detects speclan/ directory, counts specs, checks plugin dependencies |
-| `PreToolUse` (Read/Write/Edit) | Auto-injects SPECLAN format knowledge when accessing spec files |
 | `PreToolUse` (Write/Edit) | Guards locked specs - blocks direct edits to in-development/released/deprecated entities, rejects invalid status values |
 
 #### Manual Implementation Flow
@@ -140,6 +143,12 @@ Manage project constitution files - rules, best practices, patterns, and guardra
 | `/constitution:add` | Add rules, best practices, or guidelines to the constitution |
 | `/constitution:clarify` | Clarify or refine existing constitution rules |
 
+#### Skills
+
+| Skill | Description |
+|-------|-------------|
+| `constitution-format` | Foundational knowledge for constitution file structure and conventions |
+
 ---
 
 ### Todo
@@ -154,6 +163,19 @@ Filesystem-based task management with git integration - track tasks through open
 | `/todo:start` | Start working on a task - move to wip, create branch, assign |
 | `/todo:update` | Log implementation progress - auto-detect work from git diff |
 | `/todo:done` | Mark a task as complete - move to done, finalize log |
+
+#### Skills
+
+| Skill | Description |
+|-------|-------------|
+| `todo-format` | Foundational knowledge for todo file structure and lifecycle |
+
+#### Hooks
+
+| Event | Behavior |
+|-------|----------|
+| `SessionStart` | Detects todo/ directory and provides task context |
+| `PreToolUse` (Read/Write/Edit) | Auto-injects todo format knowledge when accessing task files |
 
 #### Directory Structure
 
@@ -182,7 +204,6 @@ todo/
 
 | Dependency | Required By |
 |------------|-------------|
-| **feature-dev plugin** | `/speclan:implement` |
 | **BMAD-METHOD** | `/speclan:from-bmad`, `/speclan:to-bmad`, `/speclan:to-bmad-prd` |
 | **speckit plugin** | `/speclan:from-speckit`, `/speclan:to-speckit` |
 
