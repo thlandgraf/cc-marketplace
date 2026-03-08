@@ -163,13 +163,13 @@ This makes the round-trip safe at any point in the lifecycle.
 The `approved` status is central to the BMAD ↔ SPECLAN flow:
 
 ```
-                    ┌─────────────────────────────┐
+                    ┌──────────────────────────────┐
   BMAD import ───>  │  draft ─> review ─> approved │ ──> BMAD export picks up here
-                    └─────────────────────────────┘
-                                                    │
-                                    implementation  ▼
-                              in-development ─> under-test ─> released
-                              (locked — changes need CRs)
+                    └──────────────────────────────┘
+                                                               │
+                                               implementation  ▼
+                                             in-development ─> under-test ─> released
+                                                (locked — changes need CRs)
 ```
 
 - **Before `approved`**: Specs are still being shaped. Not ready for export.
