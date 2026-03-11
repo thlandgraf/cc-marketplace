@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "model": {
+    "providerId": "anthropic",
+    "modelIdentifier": "default",
+    "displayName": "Default",
+    "authMethod": "oauth"
+  },
+  "updatedAt": "2026-03-11T16:07:17.455Z"
+}

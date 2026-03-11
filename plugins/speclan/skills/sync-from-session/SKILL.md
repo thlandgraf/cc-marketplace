@@ -284,7 +284,7 @@ For locked entities (features or requirements in-development, under-test, releas
    id: CR-####
    type: changeRequest
    title: <Change title>
-   status: pending
+   status: under-test
    owner: Developer
    created: "<ISO-8601>"
    updated: "<ISO-8601>"
