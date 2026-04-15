@@ -1,0 +1,9 @@
+{
+  "name": "speclan-engineering",
+  "version": "0.1.0",
+  "description": "Companion to the speclan plugin for interactively crafting SPECLAN specifications (Goals, Features, Requirements, Change Requests) with Claude Code instead of authoring them by hand",
+  "author": {
+    "name": "Thomas Landgraf",
+    "email": "tl@digital-dividend.de"
+  }
+}
