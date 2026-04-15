@@ -46,6 +46,24 @@
       "license": "MIT"
     },
     {
+      "name": "speclan-engineering",
+      "description": "Companion to speclan for interactively crafting SPECLAN specifications with Claude Code instead of authoring them by hand",
+      "version": "0.1.0",
+      "source": "./plugins/speclan-engineering",
+      "author": {
+        "name": "Thomas Landgraf",
+        "email": "tl@digital-dividend.de"
+      },
+      "keywords": [
+        "speclan",
+        "specifications",
+        "requirements-engineering",
+        "authoring",
+        "elicitation"
+      ],
+      "license": "MIT"
+    },
+    {
       "name": "todo",
       "description": "Filesystem-based task management with git integration - track tasks through open/wip/done lifecycle",
       "version": "0.1.0",
