@@ -1,5 +1,10 @@
 # Digital Dividend Plugin Marketplace
 
+[![SPECLAN on VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/DigitalDividend.speclan-vscode-extension?label=SPECLAN&color=007ACC&logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=DigitalDividend.speclan-vscode-extension)
+[![Claude Code](https://img.shields.io/badge/topic-claude--code-orange?logo=github&logoColor=white)](https://github.com/topics/claude-code)
+[![spec-driven-development](https://img.shields.io/badge/topic-spec--driven--development-blue?logo=github&logoColor=white)](https://github.com/topics/spec-driven-development)
+[![BMAD-METHOD](https://img.shields.io/badge/topic-bmad--method-1e40af?logo=github&logoColor=white)](https://github.com/topics/bmad-method)
+
 Claude Code plugins for specification-driven development, project governance, and task management.
 
 This repo is intended to be cloned and customized to fit your software development process. Fork it, adjust the plugins to match your workflows, and use it as a starting point rather than a fixed dependency.
