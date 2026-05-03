@@ -56,7 +56,7 @@ Having detected the `speclan/` location in the prerequisites, remember its absol
 
 ### Step 2.5 — Resolve the owner value
 
-Every spec this pipeline creates or modifies gets its `owner` frontmatter field set to the current git user name, resolved once and cached in pipeline state. Follow the **Owner field resolution** procedure in `references/entity-content.md` — primary: `git config user.name`, fallbacks: `git config --global user.name`, `$USER`, finally `AskUserQuestion`. Store the result as `owner_value` and reuse it for every entity created in this run.
+Every spec this pipeline creates or modifies gets its `owner` frontmatter field set to the current git user email, resolved once and cached in pipeline state. Follow the **Owner field resolution** procedure in `references/entity-content.md` — primary: `git config user.email`, fallback: `git config --global user.email`, finally `AskUserQuestion`. Store the result as `owner_value` and reuse it for every entity created in this run.
 
 Report the resolved owner to the user in the initial status message: *"Running HLRD import as owner: `<owner_value>`"*, so they know what will be stamped on every produced spec.
 
@@ -149,7 +149,7 @@ File creation is a **thin wrapper** around the `speclan-format` skill. The autho
 This skill only contributes:
 
 1. **HLRD-derived content** — the goal/feature/requirement body text, derived from the plan and the HLRD source, following the body templates in `references/entity-content.md`.
-2. **HLRD-specific metadata** — setting `owner: <owner_value>` (the cached git user name resolved in Preflight Step 2.5), `status: draft`, and linking the HLRD-planning decisions into the content (feature goals, requirement parent, etc.).
+2. **HLRD-specific metadata** — setting `owner: <owner_value>` (the cached git user email resolved in Preflight Step 2.5), `status: draft`, and linking the HLRD-planning decisions into the content (feature goals, requirement parent, etc.).
 3. **Merge rules for `action: modify`** — how to fold HLRD content into existing draft/review/approved entities without breaking invariants. These live in `references/entity-content.md`.
 
 Read `references/entity-content.md` now for body templates and merge rules. It does **not** duplicate the structural rules from `speclan-format`.
@@ -177,14 +177,14 @@ Collect all IDs upfront. If the generator reports collisions during creation, re
 
 1. **Follow `speclan-format`'s "Creating New Specifications" procedure for entity type `goal`**, passing the title from the plan. That procedure handles template discovery (`speclan/templates/goals/`), ID generation (via `speclan-id-generator`), slug derivation, file location, and frontmatter fields.
 2. **Fill the body** using the Goal body template in `references/entity-content.md`, populated from the plan's `summary` and the relevant HLRD sections.
-3. **Set HLRD-specific frontmatter**: `owner: <owner_value>` (the cached git user name resolved in Preflight Step 2.5), `status: draft`.
+3. **Set HLRD-specific frontmatter**: `owner: <owner_value>` (the cached git user email resolved in Preflight Step 2.5), `status: draft`.
 4. Report `Goal G-### created: <title>`.
 
 ### Creating a feature
 
 1. **Follow `speclan-format`'s "Creating New Specifications" procedure for entity type `feature`**, passing the title and — for nested features — the parent feature's ID. That procedure handles template discovery (`speclan/templates/features/`), parent-aware ID generation, the directory-based storage layout (including root/child/subtree-entry-point nesting), `mkdir` discipline, and frontmatter fields.
 2. **Fill the body** using the Feature body template in `references/entity-content.md`, populated from the plan's `summary`, user story (derived from HLRD), and scope.
-3. **Set HLRD-specific frontmatter**: `owner: <owner_value>` (the cached git user name resolved in Preflight Step 2.5), `status: draft`, `leaf: <true|false>` per the plan's `isLeaf` flag.
+3. **Set HLRD-specific frontmatter**: `owner: <owner_value>` (the cached git user email resolved in Preflight Step 2.5), `status: draft`, `leaf: <true|false>` per the plan's `isLeaf` flag.
 4. Leave the `goals:` frontmatter list empty for now — Phase 3 populates it via bidirectional linking once all features exist.
 5. Report `Feature F-#### created: <title>`.
 
@@ -229,7 +229,7 @@ Requirements are generated **per feature**, sequentially, so the agent has fresh
    - **Atomic** — tests one thing.
    - **Testable** — has clear pass/fail criteria.
    - **Traceable** — clearly derived from HLRD content or feature description.
-6. For each requirement, **follow `speclan-format`'s "Creating New Specifications" procedure for entity type `requirement`**, passing the title and parent feature ID. That procedure handles the parent-aware ID generation (`--parent <featureId>`), the directory-based storage layout inside the parent feature's `requirements/` directory, and the `feature: F-####` frontmatter linkage. Fill the body using the Requirement body template in `references/entity-content.md` — in particular, acceptance criteria must use GFM task list checkboxes (`- [ ] Given X, when Y, then Z`) for trackability. Set HLRD-specific frontmatter: `owner: <owner_value>` (the cached git user name resolved in Preflight Step 2.5), `status: draft`.
+6. For each requirement, **follow `speclan-format`'s "Creating New Specifications" procedure for entity type `requirement`**, passing the title and parent feature ID. That procedure handles the parent-aware ID generation (`--parent <featureId>`), the directory-based storage layout inside the parent feature's `requirements/` directory, and the `feature: F-####` frontmatter linkage. Fill the body using the Requirement body template in `references/entity-content.md` — in particular, acceptance criteria must use GFM task list checkboxes (`- [ ] Given X, when Y, then Z`) for trackability. Set HLRD-specific frontmatter: `owner: <owner_value>` (the cached git user email resolved in Preflight Step 2.5), `status: draft`.
 7. Report `Feature F-####: N requirements created`.
 
 **Prefer fewer high-quality requirements over many vague ones.** Overlap between requirements within a feature is a strong sign to consolidate.

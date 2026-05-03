@@ -53,7 +53,7 @@ This gives you a map of vision + all goals + top-level features in a handful of 
 
 ### Step 2.5 — Resolve the owner value
 
-Every spec this pipeline creates or modifies gets its `owner` frontmatter field set to the current git user name, resolved once and cached in pipeline state. Follow the **Owner field resolution** procedure in `../hlrd-authoring/references/entity-content.md` — primary: `git config user.name`, fallbacks: `git config --global user.name`, `$USER`, finally `AskUserQuestion`. Store the result as `owner_value` and reuse it for every entity created in this session.
+Every spec this pipeline creates or modifies gets its `owner` frontmatter field set to the current git user email, resolved once and cached in pipeline state. Follow the **Owner field resolution** procedure in `../hlrd-authoring/references/entity-content.md` — primary: `git config user.email`, fallback: `git config --global user.email`, finally `AskUserQuestion`. Store the result as `owner_value` and reuse it for every entity created in this session.
 
 Report the resolved owner to the user in the grounding-confirmation message: *"Running brainstorm as owner: `<owner_value>`"* so they know what will be stamped on any specs produced.
 
@@ -210,12 +210,18 @@ Options:
 
 ### Per-entity check
 
-For each entity (in plan order), assess:
+For each entity (in plan order), assess two things: **user-centricity** and **clarity**.
+
+**User-centricity check (silent — does not consume question budget):**
+
+Before assessing clarity, silently reframe any entity that has drifted into implementation language. Specs describe what users need, not how the code is structured. If the brainstorm conversation produced titles like "DI Extraction for X Service" or descriptions referencing constructor signatures, import paths, or class hierarchies, rewrite the title and summary in terms of the user outcome. The brainstorm conversation naturally gravitates toward implementation when the user is technical — that's fine for exploration, but the spec must land in user-centric language. Do this silently; it doesn't require a question.
+
+**Clarity check (consumes question budget):**
 
 - **Goals**: Is the success criterion concrete enough to know when it's achieved? If not, ask.
 - **Features**: Is the user story's `<user type>` clear? If "a user" is the best you can do, ask.
-- **Requirements**: Is the acceptance criterion testable? If Given/When/Then would require a guess, ask.
-- **Change requests**: Is the change narrative specific about what changes? If it's vague, ask.
+- **Requirements**: Is the acceptance criterion testable from outside the codebase? If Given/When/Then would require reading source code to verify, ask for the observable behavior instead.
+- **Change requests**: Is the change narrative specific about what changes for the user? If it's vague, ask.
 
 If any of these are already clear from the brainstorm conversation, **skip** the question for that entity. Don't burn budget asking things you already know.
 
@@ -237,7 +243,7 @@ For each entity in the plan, apply the rule matching its `action`:
 
 1. **Follow `speclan-format`'s "Creating New Specifications" procedure** for the entity type, passing the title and parent ID (if any). That procedure calls `speclan-id-generator`, handles template discovery, computes the directory path, and writes the frontmatter.
 2. **Fill the body** using the appropriate template in `${CLAUDE_PLUGIN_ROOT}/../hlrd-authoring/references/entity-content.md`. That reference is shared between `hlrd-authoring` and this skill to avoid drift.
-3. **Set session-specific frontmatter**: `owner: <owner_value>` (the cached git user name resolved in Phase 0 Step 2.5), `status: draft`.
+3. **Set session-specific frontmatter**: `owner: <owner_value>` (the cached git user email resolved in Phase 0 Step 2.5), `status: draft`.
 4. For features, leave `goals:` empty if no anchor goal exists; populate it if the brainstorm selected one.
 5. Report: `{type} {id} created: <title>`.
 

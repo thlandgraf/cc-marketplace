@@ -50,7 +50,7 @@ id: CR-####                         # from speclan-id-generator
 type: changeRequest
 title: <short change title>         # 3–8 words describing the proposed change
 status: pending                     # always `pending` for new CRs from brainstorm
-owner: <git user.name>              # the cached owner_value resolved in Phase 0 — see entity-content.md "Owner field resolution"
+owner: <git user.email>             # the cached owner_value resolved in Phase 0 — see entity-content.md "Owner field resolution"
 created: <ISO-8601 timestamp>
 updated: <ISO-8601 timestamp>
 parentId: <locked-entity-id>        # e.g., F-5678 or R-0042

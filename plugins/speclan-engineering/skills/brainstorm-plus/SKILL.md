@@ -44,7 +44,7 @@ Phase 9  → Summary                  (REUSE brainstorm Phase 6 + technique cont
 
 ## Phase 0 — Grounding
 
-**Delegate to `/brainstorm` skill's Phase 0.** Load `${CLAUDE_PLUGIN_ROOT}/../brainstorm/SKILL.md` and `${CLAUDE_PLUGIN_ROOT}/../brainstorm/references/grounding.md`. Follow the procedure exactly: resolve the thought, detect speclan directory, build lightweight context, **resolve the `owner_value` from `git config user.name` and cache it** (brainstorm Phase 0 Step 2.5), anchor via explicit IDs or noun Grep, classify into one of the seven types, present the interpretation, handle `not-speclan` exit.
+**Delegate to `/brainstorm` skill's Phase 0.** Load `${CLAUDE_PLUGIN_ROOT}/../brainstorm/SKILL.md` and `${CLAUDE_PLUGIN_ROOT}/../brainstorm/references/grounding.md`. Follow the procedure exactly: resolve the thought, detect speclan directory, build lightweight context, **resolve the `owner_value` from `git config user.email` and cache it** (brainstorm Phase 0 Step 2.5), anchor via explicit IDs or noun Grep, classify into one of the seven types, present the interpretation, handle `not-speclan` exit.
 
 **One difference at argument resolution**: before treating `$ARGUMENTS` as the thought, strip the `--techniques=<csv>` flag if present. See Phase 1 Step 1 for flag parsing — it runs before grounding Step 1 so the thought passed to grounding is the pure text.
 
@@ -54,7 +54,7 @@ State captured from Phase 0 for downstream phases:
 - `classification` — one of the seven classes from `grounding.md`
 - `anchor` — the anchor entity details or `null`
 - `project_summary` — 1-sentence description of the project's vision/mission
-- `owner_value` — the resolved git user name used as the `owner` field on every spec this pipeline creates or modifies
+- `owner_value` — the resolved git user email used as the `owner` field on every spec this pipeline creates or modifies
 
 If classification is `not-speclan`, exit the pipeline (same as `/brainstorm`).
 
@@ -222,7 +222,7 @@ Everything else in the loop is unchanged: `AskUserQuestion` commitment gate, fre
 
 ## Phase 6 — Quality Clarification
 
-**Delegate to `/brainstorm` skill's Phase 3 verbatim.** ≤1 question per entity, hard cap 3 total.
+**Delegate to `/brainstorm` skill's Phase 3 verbatim.** ≤1 question per entity, hard cap 3 total. This includes the silent user-centricity reframe — brainstorm-plus sessions are especially prone to implementation-language drift because the subagent techniques (First Principles, Constraint-Based) naturally surface architectural ideas. The spec must still land in user-centric language.
 
 ## Phase 7 — Creation
 

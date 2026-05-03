@@ -23,21 +23,20 @@ If a frontmatter example below conflicts with `speclan-format`, **`speclan-forma
 
 ## Owner field resolution
 
-Every entity this plugin creates or modifies sets the `owner` frontmatter field to the **current git user name**, not a hardcoded string like "HLRD Import" or "Brainstorm". The owner should reflect the human accountable for the spec, and the git user name is the best available signal for that in a CLI context.
+Every entity this plugin creates or modifies sets the `owner` frontmatter field to the **current git user email**, not a hardcoded string like "HLRD Import" or "Brainstorm". The owner should identify the human accountable for the spec, and the git user email is the most stable, unambiguous signal for that in a CLI context.
 
 ### Resolution procedure
 
 At the **start** of any pipeline run that creates or modifies specs, resolve the owner value **once** and cache it in pipeline state under `owner_value`. Every subsequent entity creation in the same run uses the cached value — don't re-run the resolution per entity.
 
-1. **Primary**: run `git config user.name` via `Bash` in the project directory. If the output is a non-empty string, use it as `owner_value`.
-2. **Fallback 1**: if step 1 is empty or errors, run `git config --global user.name`. If non-empty, use it.
-3. **Fallback 2**: if step 2 is also empty, read the `$USER` environment variable.
-4. **Last resort**: if all three are empty, use `AskUserQuestion` to prompt the user:
-   > No git user name is configured. What name should I use as the `owner` for the specs I'm about to create?
+1. **Primary**: run `git config user.email` via `Bash` in the project directory. If the output is a non-empty string, use it as `owner_value`.
+2. **Fallback**: if step 1 is empty or errors, run `git config --global user.email`. If non-empty, use it.
+3. **Last resort**: if both are empty, use `AskUserQuestion` to prompt the user:
+   > No git user email is configured. What email should I use as the `owner` for the specs I'm about to create?
    - Accept free-text response
    - Offer option `Cancel the pipeline` so the user can set up git and restart
 
-The resolved value becomes `owner_value` for the pipeline. Record it in the initial status message so the user knows what will be stamped on every spec they're about to create (e.g., *"Creating specs as owner: Alex Rivera"*).
+The resolved value becomes `owner_value` for the pipeline. Record it in the initial status message so the user knows what will be stamped on every spec they're about to create (e.g., *"Creating specs as owner: alex@example.com"*).
 
 ### Why cache once per pipeline
 
@@ -50,13 +49,33 @@ The resolved value becomes `owner_value` for the pipeline. Record it in the init
 - **Means**: the human accountable for the spec at the moment of creation. Typically the person running the CLI session.
 - **Does NOT mean**: the long-term maintainer, the domain expert, or the approver. Those are separate concerns — if a project needs them, they belong in dedicated frontmatter fields (`maintainer`, `approver`) managed by `speclan-format`, not overloaded onto `owner`.
 
-### When the frontmatter examples below show `owner: <git user.name>`
+### When the frontmatter examples below show `owner: <git user.email>`
 
-Every frontmatter example in this document uses the placeholder `<git user.name>` in the `owner` field. Replace it with the resolved `owner_value` at write time. Do NOT copy the literal string `<git user.name>` into an actual spec file.
+Every frontmatter example in this document uses the placeholder `<git user.email>` in the `owner` field. Replace it with the resolved `owner_value` at write time. Do NOT copy the literal string `<git user.email>` into an actual spec file.
 
 ## Universal body rules — coherence enforcement
 
-Every body template in this document follows two non-negotiable rules that the cross-referencing phase validates and enforces. See `references/cross-referencing.md` for the full canonical contract; the summary below is the author-facing version that applies while writing body content.
+Every body template in this document follows three non-negotiable rules. The first is about perspective; the other two are cross-referencing rules validated by the cross-referencing phase (see `references/cross-referencing.md` for the full canonical contract).
+
+### Rule 0 — User-centric perspective
+
+Specs describe what users need, experience, or benefit from — not how the system is built internally. The audience is a product stakeholder who cares about outcomes, not a developer reading the codebase.
+
+**Titles** name the user-visible capability or outcome, not the implementation technique:
+
+| Implementation-centric (wrong) | User-centric (right) |
+|---|---|
+| DI Extraction for cr-merge Services | Independently Testable AI Workflows |
+| React Component Refactor | Faster Dashboard Load Times |
+| Database Index Optimization | Sub-Second Search Results |
+
+**Overviews** open with the user problem or opportunity, not the architectural situation. "Users see raw provider errors they can't act on" is the right starting point; "The error-handling module currently catches exceptions at the wrong layer" is not.
+
+**Descriptions** state what the system must do for the user, not how it should be restructured internally. Constructor signatures, import paths, class hierarchies, file names, and design patterns (DI, CQRS, pub/sub) belong in architecture docs or CLAUDE.md files near the code — not in specs.
+
+**Acceptance criteria** describe observable outcomes a user or tester can verify, not implementation checkpoints. "The debug log never shows raw API keys" is testable from outside; "`cr-merge-service.ts` no longer imports `getLogger` from the extension subtree" is an implementation detail dressed as a requirement.
+
+This rule applies to all entity types. When in doubt, ask: "Could a product manager read this and understand what changes for the user?" If not, reframe.
 
 ### Rule 1 — No "References" section
 
@@ -108,7 +127,7 @@ id: G-###
 type: goal
 title: <3–6 word business objective>
 status: draft
-owner: <git user.name>    # resolved once at pipeline start — see "Owner field resolution" above
+owner: <git user.email>   # resolved once at pipeline start — see "Owner field resolution" above
 created: <ISO-8601 timestamp>
 updated: <ISO-8601 timestamp>
 contributors: []          # populated in Phase 3 (cross-referencing)
@@ -162,7 +181,7 @@ id: F-####
 type: feature
 title: <capability name>
 status: draft
-owner: <git user.name>    # resolved once at pipeline start — see "Owner field resolution" above
+owner: <git user.email>   # resolved once at pipeline start — see "Owner field resolution" above
 created: <ISO-8601 timestamp>
 updated: <ISO-8601 timestamp>
 goals:                    # goals this feature contributes to; populated via cross-ref phase
@@ -212,7 +231,7 @@ id: R-####
 type: requirement
 title: <specific requirement name>
 status: draft
-owner: <git user.name>    # resolved once at pipeline start — see "Owner field resolution" above
+owner: <git user.email>   # resolved once at pipeline start — see "Owner field resolution" above
 created: <ISO-8601 timestamp>
 updated: <ISO-8601 timestamp>
 feature: F-####           # parent feature ID — required
@@ -238,6 +257,7 @@ tags: []
 
 ### Style rules
 
+- **User-centric framing** (Rule 0): requirement titles name what the user gets, not the implementation technique. Descriptions say what the system does for the user, not how the code is restructured. Acceptance criteria describe outcomes observable from outside the codebase — a tester who has never seen the source code should be able to verify every criterion. If a criterion references a specific filename, class name, import path, or design pattern, it has drifted into implementation territory and should be rewritten in terms of the observable behavior it produces.
 - **Acceptance criteria use GFM task list checkboxes** (`- [ ]`) so they're trackable across tools that render markdown.
 - Each bullet uses Given/When/Then phrasing. If the HLRD uses different phrasing, translate — don't copy-paste.
 - **Atomic**: the requirement tests one thing. If you find yourself writing "and also", split.

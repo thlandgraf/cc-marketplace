@@ -50,9 +50,35 @@ feature_candidate:
   _code_paths: ["<files involved>"]  # INTERNAL USE ONLY - for matching, never included in specs
   type: "new" | "enhancement" | "bugfix"
   scope: "feature" | "requirement" | "both"
+  _status_evidence:                  # INTERNAL USE ONLY - for status determination
+    has_tests: true | false
+    tests_pass: true | false | unknown
+    is_partial: true | false
 ```
 
-**Note:** `_code_paths` is used internally to match session work to existing specs. It is NEVER written to spec files.
+**Note:** `_code_paths` and `_status_evidence` are used internally. They are NEVER written to spec files.
+
+### 1.2a Determine Status for Each Feature
+
+Sync-from-session runs after the user has already been coding ("vibe coding"), so the code already exists. The spec status must reflect where the implementation actually is — never `draft` or `approved` (those are pre-implementation states).
+
+**Determine status from evidence:**
+
+| Tests exist? | Tests pass? | Code complete? | Status |
+|---|---|---|---|
+| Yes | Yes | Yes | `under-test` |
+| Yes | Some fail | Yes | `in-development` |
+| Yes | Unknown (not run) | Yes | `in-development` |
+| No | N/A | Yes | `in-development` |
+| N/A | N/A | Partial | `in-development` |
+
+**How to gather evidence:**
+1. Search for test files matching the implementation (`*.test.*`, `*.spec.*` in the same area)
+2. Check the session history — did tests run? Did they pass?
+3. Check for TODO/FIXME markers or incomplete implementations in the code
+4. If uncertain, default to `in-development` — it's the safest post-implementation status
+
+The determined status applies to new features, new requirements, and new change requests created by this sync.
 
 ### 1.3 Categorize Changes
 
@@ -238,7 +264,7 @@ For each new feature:
    id: F-####
    type: feature
    title: <Title>
-   status: under-test
+   status: <determined in Step 1.2a — in-development or under-test>
    owner: <from session or "Developer">
    created: "<ISO-8601>"
    updated: "<ISO-8601>"
@@ -284,7 +310,7 @@ For locked entities (features or requirements in-development, under-test, releas
    id: CR-####
    type: changeRequest
    title: <Change title>
-   status: under-test
+   status: <determined in Step 1.2a — in-development or under-test>
    owner: Developer
    created: "<ISO-8601>"
    updated: "<ISO-8601>"

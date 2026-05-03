@@ -1,5 +1,5 @@
 ---
-name: speclan:sync
+name: speclan:sync-from-session
 description: Sync SPECLAN specs from session work - identifies implemented features and updates specs
 allowed-tools:
   - Read
@@ -113,8 +113,22 @@ Look for evidence of implementation:
 For each identified change, determine:
 - **Title**: Descriptive name for the feature
 - **Description**: What it does and why
-- **Code paths**: Files involved
+- **Code paths**: Files involved (internal use for matching — never written to specs)
 - **Type**: new feature, enhancement, or bugfix
+- **Status**: determined from implementation evidence (see 4.2a)
+
+#### 4.2a Determine Status
+
+Since sync-from-session runs after vibe coding, the code already exists. The spec status must reflect where the implementation actually is — never `draft` or `approved` (those are pre-implementation states).
+
+| Tests exist? | Tests pass? | Code complete? | Status |
+|---|---|---|---|
+| Yes | Yes | Yes | `under-test` |
+| Yes | Some fail | — | `in-development` |
+| No | — | Yes | `in-development` |
+| — | — | Partial | `in-development` |
+
+Search for test files (`*.test.*`, `*.spec.*`) matching the implementation, check session history for test runs, and look for TODO/FIXME markers. Default to `in-development` when uncertain.
 
 #### 4.3 Infer Requirements from Implementation
 
@@ -237,10 +251,11 @@ Based on this session, I identified:
 
 ### New Features (CREATE)
 1. **[Title]** - [Description]
+   - Determined status: [in-development | under-test] — [reason]
 
 ### Updates to Existing Features (UPDATE)
 1. **[F-####] [Title]** - [What changed]
-   - Status: [status] (editable)
+   - Current status: [status] (editable)
 
 ### Change Requests Needed (LOCKED)
 1. **[F-####] [Title]** - Cannot edit directly
@@ -354,7 +369,7 @@ generate_cr_id() {
    id: [FEATURE_ID]
    type: feature
    title: [Title]
-   status: under-test
+   status: [determined in step 4.2a — in-development or under-test]
    owner: [OWNER from git config --get user.email]
    created: "[ISO-8601]"
    updated: "[ISO-8601]"
