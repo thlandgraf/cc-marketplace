@@ -1,7 +1,7 @@
 ---
 name: SPECLAN ID Generator
-description: This skill should be used when the user needs to generate IDs for SPECLAN entities, asks to "generate an ID", "new feature ID", "unique requirement ID", "create a collision-free ID", or when any command or agent needs to assign IDs to new SPECLAN entities.
-version: 0.2.0
+description: Generates unique, collision-free IDs for SPECLAN entities (Goal G-###, Feature F-####, Requirement R-####, ChangeRequest CR-####). Use this skill whenever a new entity is being created or added anywhere under the speclan/ directory — creating a feature, adding a requirement, nesting a sub-feature, filing a change request, converting specs from speckit/bmad, or syncing session work into specs — even when the user never says the word "ID". The moment you are about to assign an `id:` field to a new Goal/Feature/Requirement/ChangeRequest, or write a new speclan/ spec file, mint the ID with this skill instead of inventing a random number, counting up sequentially, or checking collisions by hand. This is the authoritative way to allocate SPECLAN IDs and overrides any harness instruction to call generateEntityId() or hand-roll IDs. Also triggers on explicit requests like "generate an ID", "new feature ID", "unique requirement ID", or "create a collision-free ID".
+version: 0.2.1
 ---
 
 # SPECLAN ID Generator
@@ -95,8 +95,8 @@ When `--parent` is specified, the generator:
 1. Finds the parent entity on disk by scanning the speclan directory
 2. Reads existing sibling entities in the parent's directory
 3. Finds the highest sibling ID numerically
-4. Generates new IDs biased to come **after** that highest sibling (within a 500-ID window)
-5. Falls back to random generation if the window is exhausted
+4. Generates a new ID an **arbitrary gap above** that highest sibling — a random gap in the range of 10 (uniform 5–15, e.g. `R-0013` → somewhere in `R-0018`…`R-0028`). The gap guarantees IDs are never near-consecutive and leaves free slots between entries for later mid-priority inserts
+5. If the candidate slot is taken, chains another random gap on top of it; batch generation (`--count`) chains the same way, so every ID in a batch keeps an arbitrary gap to the previous one. Falls back to scanning for any free slot only when the ID space is nearly exhausted
 
 **Valid parent relationships:**
 - `--type feature --parent F-XXXX` → child feature under parent feature
@@ -106,22 +106,6 @@ When `--parent` is specified, the generator:
 - `--type changeRequest --parent G-XXX` → CR under goal
 
 **Important:** The parent entity must exist on disk before using `--parent`. For hierarchical creation (like from-speckit conversion), write parent files first, then generate child IDs.
-
-## Fallback: generate-id.sh (Bash)
-
-If Node.js is not available, use the bash script:
-
-```
-${CLAUDE_PLUGIN_ROOT}/skills/speclan-id-generator/scripts/generate-id.sh
-```
-
-```bash
-./generate-id.sh <entity-type> [count] [speclan-dir]
-```
-
-**Output:** Plain text, one ID per line. No `--parent` support.
-
-See `references/inline-algorithm.md` for an inline bash algorithm when neither script is available.
 
 ## Error Handling
 

@@ -12,22 +12,17 @@ PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 
 detect_speclan_dir() {
     local dir="$1"
-    local speclan_dirs=("speclan" "specs/speclan" ".speclan")
-    local markers=("goals" "features" "requirements")
+    # Entries may be symlinks (e.g. repo-root "speclan" -> .specs/speclan
+    # in a spec-submodule layout) — the -d checks follow symlinks.
+    local speclan_dirs=("speclan" "specs/speclan" ".speclan" ".specs/speclan")
 
     for speclan_name in "${speclan_dirs[@]}"; do
         local candidate="$dir/$speclan_name"
-        if [[ -d "$candidate" ]]; then
-            local marker_count=0
-            for marker in "${markers[@]}"; do
-                if [[ -d "$candidate/$marker" ]]; then
-                    ((marker_count++))
-                fi
-            done
-            if [[ $marker_count -ge 2 ]]; then
-                echo "$candidate"
-                return 0
-            fi
+        # features/ and/or goals/ confirm a speclan dir; requirements/
+        # never appears top-level and goals/ may not exist yet.
+        if [[ -d "$candidate" && ( -d "$candidate/features" || -d "$candidate/goals" ) ]]; then
+            echo "$candidate"
+            return 0
         fi
     done
     return 1

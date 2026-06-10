@@ -38,23 +38,32 @@ var ID_FORMAT_REGISTRY = {
   changeRequest: { prefix: "CR-", digits: 4, maxValue: 9999, pattern: ID_PATTERNS.changeRequest }
 };
 var MAX_GENERATION_ATTEMPTS = 1e3;
-var END_BIAS_WINDOW_SIZE = 500;
+// Each new ID sits an arbitrary gap above the last sibling, in the range of
+// ~10 (uniform 5..15). Gaps leave room for later mid-priority inserts and
+// avoid the near-consecutive runs (F-0012, F-0013, F-0014, ...) a fixed
+// pick-within-window strategy produces.
+var MIN_ID_GAP = 5;
+var MAX_ID_GAP = 15;
 function generateEndBiasedId(lastSiblingId, maxValue, existingIds, digits) {
-  let windowStart = lastSiblingId !== null ? lastSiblingId + 1 : 0;
-  while (windowStart <= maxValue) {
-    const windowEnd = Math.min(windowStart + END_BIAS_WINDOW_SIZE - 1, maxValue);
-    const available = [];
-    for (let candidate = windowStart; candidate <= windowEnd; candidate++) {
-      const idStr = String(candidate).padStart(digits, "0");
-      if (!existingIds.has(idStr)) {
-        available.push(candidate);
+  let base = lastSiblingId !== null ? lastSiblingId : 0;
+  while (base <= maxValue) {
+    const gap = MIN_ID_GAP + Math.floor(Math.random() * (MAX_ID_GAP - MIN_ID_GAP + 1));
+    const candidate = base + gap;
+    if (candidate > maxValue) {
+      // ID space nearly exhausted: take any free slot in the remaining tail
+      for (let c = base + 1; c <= maxValue; c++) {
+        const idStr2 = String(c).padStart(digits, "0");
+        if (!existingIds.has(idStr2)) {
+          return idStr2;
+        }
       }
+      return null;
     }
-    if (available.length > 0) {
-      const chosen = available[Math.floor(Math.random() * available.length)];
-      return String(chosen).padStart(digits, "0");
+    const idStr = String(candidate).padStart(digits, "0");
+    if (!existingIds.has(idStr)) {
+      return idStr;
     }
-    windowStart = windowEnd + 1;
+    base = candidate;
   }
   return null;
 }
@@ -481,6 +490,21 @@ async function main() {
     }
     generated.add(id);
     ids.push(id);
+    // Chain the batch: the new ID becomes the anchor for the next one, so
+    // every ID in a --count batch keeps the same arbitrary gap as singles
+    // instead of packing densely above the original last sibling.
+    entities.push({ id, type: entityType, absolutePath: "" });
+    const prefix = TYPE_PREFIX[entityType];
+    if (prefix && id.startsWith(prefix)) {
+      const num = parseInt(id.slice(prefix.length), 10);
+      if (!isNaN(num)) {
+        if (context === void 0) {
+          context = { lastSiblingId: num };
+        } else if (context.lastSiblingId === void 0 || context.lastSiblingId === null || num > context.lastSiblingId) {
+          context.lastSiblingId = num;
+        }
+      }
+    }
   }
   output(success({ type: entityType, ids }));
 }

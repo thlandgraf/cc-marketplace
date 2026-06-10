@@ -20,8 +20,8 @@ When invoked, perform these checks and display results in table format:
 ### 1. Detect SPECLAN Directory
 
 Search for speclan directory starting from provided path or current working directory:
-- Check common locations: `speclan/`, `specs/speclan/`, `.speclan/`
-- Verify characteristic subdirectories: `goals/`, `features/`, `requirements/`
+- Check common locations: `speclan/`, `specs/speclan/`, `.speclan/`, `.specs/speclan/` (any of these may be a symlink, e.g. into a spec submodule)
+- Verify characteristic subdirectories: `features/` and/or `goals/`
 
 If not found, display error with setup instructions.
 

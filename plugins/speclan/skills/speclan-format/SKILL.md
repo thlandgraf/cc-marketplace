@@ -246,8 +246,8 @@ Use relative paths in markdown content:
 
 To find the speclan directory in a project:
 
-1. Check common locations: `speclan/`, `specs/speclan/`
-2. Look for characteristic subdirectories: `goals/`, `features/`, `requirements/`
+1. Check common locations: `speclan/`, `specs/speclan/`, `.speclan/`, `.specs/speclan/` — any of these may be a symlink (e.g. a repo-root `speclan` symlink into a spec submodule)
+2. Look for characteristic subdirectories: `features/` and/or `goals/` (requirements never appear top-level; young projects may lack `goals/`)
 3. Verify markdown files with SPECLAN YAML frontmatter
 
 ### Reading Specifications
