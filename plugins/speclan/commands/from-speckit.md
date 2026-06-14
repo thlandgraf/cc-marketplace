@@ -139,7 +139,7 @@ SCRIPT="${CLAUDE_PLUGIN_ROOT}/skills/speclan-id-generator/scripts/generate-id.mj
 node "$SCRIPT" --type feature --count <num-phases> --speclan-root <speclan-dir>
 # Output: {"ok":true,"data":{"type":"feature","ids":["F-1234","F-5678",...]}}
 ```
-Parse IDs with `jq -r '.data.ids[]'`. Write parent feature files to disk immediately.
+Add `--raw` to get the IDs one per line instead of JSON. Write parent feature files to disk immediately.
 
 **Phase B — Child feature IDs** (with `--parent`, after parent files exist):
 ```bash

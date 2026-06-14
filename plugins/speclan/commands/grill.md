@@ -30,7 +30,7 @@ Explicit entry point for the `SPECLAN Grill` skill. Load the skill and run a gri
 
 ## Procedure
 
-1. Detect the speclan root using `source "${CLAUDE_PLUGIN_ROOT}/skills/speclan-format/scripts/detect-speclan.sh"` — this sets `$SPECLAN_ROOT`
+1. Detect the speclan root using `SPECLAN_ROOT=$(node "${CLAUDE_PLUGIN_ROOT}/skills/speclan-format/scripts/detect-speclan.mjs")`
 2. Load the grill skill (`${CLAUDE_PLUGIN_ROOT}/skills/grill/SKILL.md`)
 3. Parse the arguments:
    - `--language <lang>` (language code or name) → conduct the whole interview in that language; spec files are still written in English (see the skill's Session Language section). When omitted, reuse the language last set via `--language` (or requested in conversation) earlier in this session; otherwise default to English

@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash $CLAUDE_PLUGIN_ROOT/hooks/scripts/detect-context.sh",
+            "command": "node $CLAUDE_PLUGIN_ROOT/hooks/scripts/detect-context.mjs",
             "timeout": 10
           }
         ]
@@ -19,7 +19,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash $CLAUDE_PLUGIN_ROOT/hooks/scripts/guard-locked-specs.sh",
+            "command": "node $CLAUDE_PLUGIN_ROOT/hooks/scripts/guard-locked-specs.mjs",
             "timeout": 5
           }
         ]

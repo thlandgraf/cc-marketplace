@@ -61,8 +61,8 @@ Alternative: Use /speclan:to-bmad-prd for standalone PRD generation without BMAD
 Query SPECLAN directory for all approved entities:
 
 ```bash
-QUERY_SCRIPT="${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh"
-bash "$QUERY_SCRIPT" --type feature --filter-status approved --full <speclan-dir>
+QUERY_SCRIPT="${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.mjs"
+node "$QUERY_SCRIPT" --type feature --filter-status approved --full <speclan-dir>
 ```
 
 **Note:** The speclan-dir is a **positional argument** (last argument), NOT a named flag.

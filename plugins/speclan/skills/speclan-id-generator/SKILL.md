@@ -81,8 +81,8 @@ node "$SCRIPT" --type requirement --parent F-3012 --count 4 --speclan-root /path
 ### Parsing Output
 
 ```bash
-# Extract IDs array with jq
-node "$SCRIPT" --type feature --count 3 --speclan-root "$SPECLAN_DIR" | jq -r '.data.ids[]'
+# Print IDs one per line with --raw (no JSON parsing needed)
+node "$SCRIPT" --type feature --count 3 --speclan-root "$SPECLAN_DIR" --raw
 # F-1847
 # F-2934
 # F-5621

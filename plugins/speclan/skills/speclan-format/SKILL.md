@@ -275,13 +275,13 @@ To create a new spec:
    SCRIPT="${CLAUDE_PLUGIN_ROOT}/skills/speclan-id-generator/scripts/generate-id.mjs"
 
    # Generate a feature ID (collision-free, end-biased)
-   node "$SCRIPT" --type feature --speclan-root speclan | jq -r '.data.ids[0]'
+   node "$SCRIPT" --type feature --speclan-root speclan --raw
 
    # Generate a child feature ID under a parent
-   node "$SCRIPT" --type feature --parent F-1049 --speclan-root speclan | jq -r '.data.ids[0]'
+   node "$SCRIPT" --type feature --parent F-1049 --speclan-root speclan --raw
 
    # Generate a requirement ID under a feature
-   node "$SCRIPT" --type requirement --parent F-1049 --speclan-root speclan | jq -r '.data.ids[0]'
+   node "$SCRIPT" --type requirement --parent F-1049 --speclan-root speclan --raw
    ```
 
 3. **Create file in correct location:**
@@ -340,4 +340,4 @@ Key principles:
 
 ### Utility Scripts
 
-- **`scripts/detect-speclan.sh`** - Detect speclan directory in a project
+- **`scripts/detect-speclan.mjs`** - Detect speclan directory in a project (`SPECLAN_ROOT=$(node scripts/detect-speclan.mjs)`)

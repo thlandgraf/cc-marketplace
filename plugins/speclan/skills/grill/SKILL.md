@@ -47,7 +47,7 @@ The purpose is to catch these problems while they are cheap: a vague requirement
 ### 1. Locate the speclan root
 
 ```bash
-source "${CLAUDE_PLUGIN_ROOT}/skills/speclan-format/scripts/detect-speclan.sh"
+SPECLAN_ROOT=$(node "${CLAUDE_PLUGIN_ROOT}/skills/speclan-format/scripts/detect-speclan.mjs")
 ```
 
 This sets `$SPECLAN_ROOT`. If no speclan root is found, inform the user that no SPECLAN project was detected and stop.
@@ -57,7 +57,7 @@ This sets `$SPECLAN_ROOT`. If no speclan root is found, inform the user that no 
 - **Explicit entity ID** (e.g. `F-1049`, `R-2046`) — grill that entity together with its children (requirements under a feature, nested features), its linked goals, and any active change requests. Locate it via the query script:
 
   ```bash
-  "${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" \
+  node "${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.mjs" \
     --type all --filter-id F-1049 --full "$SPECLAN_ROOT"
   ```
 
@@ -66,7 +66,7 @@ This sets `$SPECLAN_ROOT`. If no speclan root is found, inform the user that no 
 - **No ID, no topic** — list the specs that benefit most from grilling: those in `draft` or `review` status.
 
   ```bash
-  "${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" \
+  node "${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.mjs" \
     --type all --full "$SPECLAN_ROOT"
   ```
 
@@ -215,6 +215,6 @@ The **Spec** link is relative from `artifacts/` — the same inline-link discipl
 This skill builds on:
 
 - **`speclan-format`** (`${CLAUDE_PLUGIN_ROOT}/skills/speclan-format/SKILL.md`) — file structure, status lifecycle, edit constraints, frontmatter fields
-- **`speclan-query`** (`${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/SKILL.md`) — entity discovery and filtering via `scripts/query.sh`
+- **`speclan-query`** (`${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/SKILL.md`) — entity discovery and filtering via `scripts/query.mjs`
 - **`speclan-id-generator`** (`${CLAUDE_PLUGIN_ROOT}/skills/speclan-id-generator/SKILL.md`) — the mandatory, sole source of IDs for every entity grill creates (invoke as `/speclan:speclan-id-generator`)
 - **`ask`** (`${CLAUDE_PLUGIN_ROOT}/skills/ask/SKILL.md`) — the context-gathering procedure (`references/context-gathering.md`) for building the picture around an entity

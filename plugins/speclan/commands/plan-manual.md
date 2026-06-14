@@ -23,11 +23,11 @@ Before doing anything else, run the query script to check if approved specs exis
 
 ```bash
 SPECLAN_DIR="${1:-./speclan}"
-QUERY="${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh"
+QUERY="${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.mjs"
 
-APPROVED_FEATURES=$("$QUERY" --type feature --filter-status approved --full "$SPECLAN_DIR")
-APPROVED_REQS=$("$QUERY" --type requirement --filter-status approved --full "$SPECLAN_DIR")
-APPROVED_CRS=$("$QUERY" --type change-request --filter-status approved --full "$SPECLAN_DIR")
+APPROVED_FEATURES=$(node "$QUERY" --type feature --filter-status approved --full "$SPECLAN_DIR")
+APPROVED_REQS=$(node "$QUERY" --type requirement --filter-status approved --full "$SPECLAN_DIR")
+APPROVED_CRS=$(node "$QUERY" --type change-request --filter-status approved --full "$SPECLAN_DIR")
 
 echo "=== Approved Features ==="
 echo "$APPROVED_FEATURES"

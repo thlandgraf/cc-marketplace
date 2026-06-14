@@ -182,13 +182,13 @@ If speclan exists, use the SPECLAN Query skill to build an index:
 
 ```bash
 # List all features with full metadata (JSON output)
-"${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" --type feature --full speclan
+node "${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.mjs" --type feature --full speclan
 
 # List requirements for a specific feature
-"${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" --type requirement --parent F-1234 --full speclan
+node "${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.mjs" --type requirement --parent F-1234 --full speclan
 
 # Filter by status (e.g., find editable features)
-"${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" --type feature --filter-status draft --full speclan
+node "${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.mjs" --type feature --filter-status draft --full speclan
 ```
 
 **Output format (JSON):**

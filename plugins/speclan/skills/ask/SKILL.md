@@ -34,7 +34,7 @@ Do not just read and parrot a single file. Instead, build a **contextual picture
 Use the detection script to find the speclan directory:
 
 ```bash
-source "${CLAUDE_PLUGIN_ROOT}/skills/speclan-format/scripts/detect-speclan.sh"
+SPECLAN_ROOT=$(node "${CLAUDE_PLUGIN_ROOT}/skills/speclan-format/scripts/detect-speclan.mjs")
 ```
 
 If no speclan root is found, inform the user that no SPECLAN project was detected.
@@ -54,14 +54,14 @@ Parse the user's question to determine:
 Use the query script for discovery:
 
 ```bash
-"${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" \
+node "${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.mjs" \
   --type all --full "$SPECLAN_ROOT"
 ```
 
 For targeted lookups, filter by type and optionally parent:
 
 ```bash
-"${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" \
+node "${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.mjs" \
   --type feature --filter-status approved "$SPECLAN_ROOT"
 ```
 
@@ -152,4 +152,4 @@ The hierarchy flows Goal → Feature → Requirement, with features nesting unde
 
 This skill builds on knowledge from:
 - **`speclan-format`** (`${CLAUDE_PLUGIN_ROOT}/skills/speclan-format/SKILL.md`) — entity hierarchy, status lifecycle, field definitions, validation rules
-- **`speclan-query`** (`${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/SKILL.md`) — fast entity discovery and filtering via `scripts/query.sh`
+- **`speclan-query`** (`${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/SKILL.md`) — fast entity discovery and filtering via `scripts/query.mjs`

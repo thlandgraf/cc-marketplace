@@ -40,12 +40,12 @@ SPECLAN_DIR="./speclan"
 Run these Bash commands to get all approved specs as JSON:
 
 ```bash
-QUERY="${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh"
+QUERY="${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.mjs"
 
 # Get all approved specs
-APPROVED_FEATURES=$("$QUERY" --type feature --filter-status approved --full "$SPECLAN_DIR")
-APPROVED_REQS=$("$QUERY" --type requirement --filter-status approved --full "$SPECLAN_DIR")
-APPROVED_CRS=$("$QUERY" --type change-request --filter-status approved --full "$SPECLAN_DIR")
+APPROVED_FEATURES=$(node "$QUERY" --type feature --filter-status approved --full "$SPECLAN_DIR")
+APPROVED_REQS=$(node "$QUERY" --type requirement --filter-status approved --full "$SPECLAN_DIR")
+APPROVED_CRS=$(node "$QUERY" --type change-request --filter-status approved --full "$SPECLAN_DIR")
 ```
 
 The output is JSON arrays with `id`, `slug`, `type`, `path`, `title`, `status` fields per entity.

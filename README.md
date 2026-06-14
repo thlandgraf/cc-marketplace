@@ -25,6 +25,7 @@ Claude Code helper for the [SPECLAN](https://marketplace.visualstudio.com/items?
 | Flow | Description |
 |------|-------------|
 | **Ask** | Query specs with full context — hierarchy, relationships, status |
+| **Grill** | Interview the user question-by-question to harden specs before approval |
 | **Impl → Spec** | Sync session work to SPECLAN specifications |
 | **Spec → Impl** | Plan, implement, and review approved specs (manual three-phase workflow) |
 | **BMAD → Speclan** | Convert BMAD planning artifacts (PRD, Epics) to SPECLAN format |
@@ -37,6 +38,7 @@ Claude Code helper for the [SPECLAN](https://marketplace.visualstudio.com/items?
 | Command | Description |
 |---------|-------------|
 | `/speclan:ask` | Ask about any SPECLAN entity — get holistic context with hierarchy, relationships, and status |
+| `/speclan:grill` | Grill the user on a spec — one-question-at-a-time interview that reduces ambiguities, clarifies contradictions, and closes definition gaps before approval (`--language` for non-English sessions) |
 | `/speclan:status` | Check project setup, installed plugins, and spec statistics |
 | `/speclan:sync` | Sync session work to SPECLAN specs - identifies implemented features |
 | `/speclan:plan-manual` | Create a manual implementation plan from approved specs |
@@ -68,6 +70,7 @@ Claude Code helper for the [SPECLAN](https://marketplace.visualstudio.com/items?
 | `speclan-query` | Query specs by type, status, or parent relationship (JSON output) |
 | `speclan-id-generator` | Collision-free random ID generation for SPECLAN entities |
 | `ask` | Answer spec questions with full context — hierarchy, relationships, status |
+| `grill` | Interview workflow that questions a spec's ambiguities, contradictions, and gaps, applying agreed fixes to the spec |
 | `sync-from-session` | Workflow for capturing session work as SPECLAN specs |
 | `plan-manual` | Create manual implementation plans from approved specs |
 | `implement-manual` | Implement next item from a manual plan (plan → implement → review) |

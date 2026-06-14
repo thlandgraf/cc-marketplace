@@ -242,10 +242,10 @@ For new entities, generate collision-free IDs:
 SCRIPT="${CLAUDE_PLUGIN_ROOT}/skills/speclan-id-generator/scripts/generate-id.mjs"
 
 # Generate a feature ID
-FEATURE_ID=$(node "$SCRIPT" --type feature --speclan-root "$SPECLAN_DIR" | jq -r '.data.ids[0]')
+FEATURE_ID=$(node "$SCRIPT" --type feature --speclan-root "$SPECLAN_DIR" --raw)
 
 # Generate a requirement ID under a parent feature
-REQ_ID=$(node "$SCRIPT" --type requirement --parent "$FEATURE_ID" --speclan-root "$SPECLAN_DIR" | jq -r '.data.ids[0]')
+REQ_ID=$(node "$SCRIPT" --type requirement --parent "$FEATURE_ID" --speclan-root "$SPECLAN_DIR" --raw)
 ```
 
 ### 5.2 Create New Features
@@ -301,7 +301,7 @@ For locked entities (features or requirements in-development, under-test, releas
 
 1. **Generate CR ID:**
    ```bash
-   CR_ID=$(node "$SCRIPT" --type change-request --speclan-root "$SPECLAN_DIR" | jq -r '.data.ids[0]')
+   CR_ID=$(node "$SCRIPT" --type change-request --speclan-root "$SPECLAN_DIR" --raw)
    ```
 
 2. **Create CR file:**

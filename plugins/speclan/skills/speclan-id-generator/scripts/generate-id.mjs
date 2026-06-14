@@ -366,6 +366,7 @@ function printHelp() {
         "--parent <id>        Parent entity ID for end-biased generation (optional)",
         "--count <n>          Number of IDs to generate (default: 1)",
         "--speclan-root <path> Override speclan directory location",
+        "--raw                Print generated IDs one per line instead of JSON",
         "--help               Show this help message"
       ],
       supportedTypes: Object.entries(SUPPORTED_TYPES).map(([key, desc]) => `${key}: ${desc}`)
@@ -505,6 +506,10 @@ async function main() {
         }
       }
     }
+  }
+  if (args.includes("--raw")) {
+    process.stdout.write(ids.join("\n") + "\n");
+    process.exit(0);
   }
   output(success({ type: entityType, ids }));
 }

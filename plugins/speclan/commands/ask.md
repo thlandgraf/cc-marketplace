@@ -30,7 +30,7 @@ When the user asks questions like "where do we set status" or "how does X work",
 
 ## Procedure
 
-1. Detect the speclan root using `source "${CLAUDE_PLUGIN_ROOT}/skills/speclan-format/scripts/detect-speclan.sh"` — this sets `$SPECLAN_ROOT`
+1. Detect the speclan root using `SPECLAN_ROOT=$(node "${CLAUDE_PLUGIN_ROOT}/skills/speclan-format/scripts/detect-speclan.mjs")`
 2. Load the `speclan:ask` skill (`${CLAUDE_PLUGIN_ROOT}/skills/ask/SKILL.md`)
 3. Use the argument as the user's question
 4. Follow the skill's workflow, restricting all file reads, Glob, and Grep to paths within `$SPECLAN_ROOT`

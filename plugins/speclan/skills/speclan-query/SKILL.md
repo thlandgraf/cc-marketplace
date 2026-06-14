@@ -14,7 +14,7 @@ Fast, flexible querying of SPECLAN entities with JSON output. Query by type, fil
 - **Reliable**: Uses `{PREFIX}-{ID}-{slug}` naming pattern as source of truth
 - **Flexible**: Query any entity type, filter by status/parent
 - **Structured**: Clean JSON output for programmatic consumption
-- **zsh-safe**: Avoids reserved word conflicts (uses `entity_status` not `status`)
+- **Portable**: Plain Node.js script — no jq, awk, or other external tools required
 
 ## Entity Types
 
@@ -30,13 +30,13 @@ Fast, flexible querying of SPECLAN entities with JSON output. Query by type, fil
 ### Script Location
 
 ```
-${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh
+${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.mjs
 ```
 
 ### Command Line
 
 ```bash
-./query.sh [OPTIONS] [speclan-dir]
+node query.mjs [OPTIONS] [speclan-dir]
 ```
 
 **Options:**
@@ -59,7 +59,7 @@ ${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh
 ### List all features (fast - filename only)
 
 ```bash
-./query.sh --type feature speclan
+node query.mjs --type feature speclan
 ```
 
 Output:
@@ -73,7 +73,7 @@ Output:
 ### List features with full details
 
 ```bash
-./query.sh --type feature --full speclan
+node query.mjs --type feature --full speclan
 ```
 
 Output:
@@ -87,31 +87,31 @@ Output:
 ### Filter by status
 
 ```bash
-./query.sh --type feature --filter-status approved speclan
+node query.mjs --type feature --filter-status approved speclan
 ```
 
 ### Find requirements for a feature
 
 ```bash
-./query.sh --type requirement --parent F-1049 speclan
+node query.mjs --type requirement --parent F-1049 speclan
 ```
 
 ### Find change-requests for a requirement
 
 ```bash
-./query.sh --type change-request --parent R-2046 speclan
+node query.mjs --type change-request --parent R-2046 speclan
 ```
 
 ### Combine filters
 
 ```bash
-./query.sh --type requirement --parent F-1049 --filter-status approved --full speclan
+node query.mjs --type requirement --parent F-1049 --filter-status approved --full speclan
 ```
 
 ### Query all entity types
 
 ```bash
-./query.sh --type all speclan
+node query.mjs --type all speclan
 ```
 
 ## Query Modes
@@ -173,7 +173,7 @@ The `--parent` flag checks multiple locations:
 
 ```bash
 # Index existing features
-FEATURES_JSON=$("${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" --type feature --full speclan)
+FEATURES_JSON=$(node "${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.mjs" --type feature --full speclan)
 
 # Check if feature exists
 if echo "$FEATURES_JSON" | grep -q '"id":"F-1049"'; then
@@ -181,28 +181,28 @@ if echo "$FEATURES_JSON" | grep -q '"id":"F-1049"'; then
 fi
 
 # Get editable features (not locked)
-EDITABLE=$("${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.sh" --type feature --filter-status draft speclan)
+EDITABLE=$(node "${CLAUDE_PLUGIN_ROOT}/skills/speclan-query/scripts/query.mjs" --type feature --filter-status draft speclan)
 ```
 
 ### Extract specific fields with grep
 
 ```bash
 # Get all feature IDs
-./query.sh --type feature speclan | grep -oE '"id":"[^"]+"' | cut -d'"' -f4
+node query.mjs --type feature speclan | grep -oE '"id":"[^"]+"' | cut -d'"' -f4
 
 # Get all paths
-./query.sh --type feature speclan | grep -oE '"path":"[^"]+"' | cut -d'"' -f4
+node query.mjs --type feature speclan | grep -oE '"path":"[^"]+"' | cut -d'"' -f4
 
 # Count entities
-./query.sh --type requirement speclan | grep -c '"id"'
+node query.mjs --type requirement speclan | grep -c '"id"'
 ```
 
 ### Process each entity
 
 ```bash
-./query.sh --type feature --full speclan | grep -oE '"id":"[^"]+"' | cut -d'"' -f4 | while read -r fid; do
+node query.mjs --type feature --full speclan | grep -oE '"id":"[^"]+"' | cut -d'"' -f4 | while read -r fid; do
   echo "Processing feature: $fid"
-  req_count=$(./query.sh --type requirement --parent "$fid" speclan | grep -c '"id"' || echo 0)
+  req_count=$(node query.mjs --type requirement --parent "$fid" speclan | grep -c '"id"' || echo 0)
   echo "  Requirements: $req_count"
 done
 ```
