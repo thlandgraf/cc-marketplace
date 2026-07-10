@@ -78,10 +78,10 @@ For any entity, check for active change requests:
 1. Look for `change-requests/` directory inside the entity's directory
 2. Read each CR file's frontmatter: `status`, `changeType`, `description`
 3. Filter out `_archived/` CRs
-4. Highlight CRs with `status: pending` or `status: approved` — these affect the entity's future
+4. Highlight CRs with `status: draft` or `status: approved` — these affect the entity's future
 
 Active CR statuses that matter:
-- `pending` / `draft` / `review` — proposed changes, not yet actionable
+- `draft` / `review` — proposed changes, not yet actionable
 - `approved` — approved change, should be implemented
 - `in-development` / `under-test` — change in progress
 

@@ -88,10 +88,12 @@ Entities must correctly reference their parents:
 draft | review | approved | in-development | under-test | released | deprecated
 ```
 
-**ChangeRequest entities:**
+**ChangeRequest entities:** same lifecycle as standard entities.
 ```
-pending | draft | review | approved | in-development | under-test | merged | closed
+draft | review | approved | in-development | under-test | released | deprecated
 ```
+> Legacy CR statuses `pending`/`merged`/`closed` are retired
+> (`pending` → `draft`, `merged` → `under-test`, `closed` → `deprecated`).
 
 ### Editability Rules
 
@@ -133,9 +135,9 @@ A ChangeRequest (`CR-####`) MUST be created when:
 
 **ChangeRequest workflow:**
 ```
-1. Create CR in <entity>/change-requests/
-2. CR status: pending → draft → review → approved → in-development → merged
-3. When merged, apply changes to parent entity
+1. Create CR in <entity>/change-requests/ with status: draft
+2. CR status: draft → review → approved → in-development → under-test → released
+3. When released, apply changes to parent entity
 4. Update parent entity's `updated` timestamp
 ```
 

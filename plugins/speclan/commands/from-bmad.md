@@ -662,7 +662,7 @@ For each incoming BMAD element, look up its source identifier in the provenance 
 id: CR-XXXX
 type: changeRequest
 title: "Re-import update: [brief description of change]"
-status: pending
+status: draft
 owner: [OWNER from git config]
 created: [current date]
 updated: [current date]
@@ -672,7 +672,7 @@ changeType: enhancement
 description: "Updated content from BMAD re-import. Source: [bmad identifier]"
 changes: |
   [Full updated content from the BMAD source, ready to be applied
-  when the change request is approved and merged.]
+  when the change request is approved and released.]
 ---
 ```
 

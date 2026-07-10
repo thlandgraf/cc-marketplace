@@ -186,16 +186,21 @@ Proposed modifications to released or locked entities.
 | `changeType` | string | Yes | enhancement, bugfix, breaking, deprecation, documentation |
 | `description` | string | Yes | Change description |
 | `changes` | string | Yes | Detailed change narrative |
-| `closedReason` | string | No | Why CR was closed |
+| `closedReason` | string | No | Why the CR was dropped/rejected |
 | `supersededBy` | CRId | No | Superseding CR ID |
-| `mergedAt` | ISO-8601 | No | Merge timestamp |
-| `mergedBy` | string | No | Person who merged |
+| `mergedAt` | ISO-8601 | No | Timestamp the CR was applied (released) |
+| `mergedBy` | string | No | Who applied the CR |
 
 ### ChangeRequest Status Values
 
+Change Requests use the **same lifecycle as every other entity**:
+
 ```
-pending | draft | review | approved | in-development | under-test | merged | closed
+draft | review | approved | in-development | under-test | released | deprecated
 ```
+
+> The legacy CR-only statuses `pending`, `merged`, and `closed` are retired.
+> Map any old data: `pending` → `draft`, `merged` → `under-test`, `closed` → `deprecated`.
 
 ### Example ChangeRequest
 
@@ -204,7 +209,7 @@ pending | draft | review | approved | in-development | under-test | merged | clo
 id: CR-0001
 type: changeRequest
 title: Add microchipping validation to pet sales
-status: pending
+status: draft
 owner: Product Team
 created: "2025-12-29T12:00:00.000Z"
 updated: "2025-12-29T12:00:00.000Z"
