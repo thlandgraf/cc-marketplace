@@ -95,8 +95,8 @@ When `--parent` is specified, the generator:
 1. Finds the parent entity on disk by scanning the speclan directory
 2. Reads existing sibling entities in the parent's directory
 3. Finds the highest sibling ID numerically
-4. Generates a new ID an **arbitrary gap above** that highest sibling — a random gap in the range of 10 (uniform 5–15, e.g. `R-0013` → somewhere in `R-0018`…`R-0028`). The gap guarantees IDs are never near-consecutive and leaves free slots between entries for later mid-priority inserts
-5. If the candidate slot is taken, chains another random gap on top of it; batch generation (`--count`) chains the same way, so every ID in a batch keeps an arbitrary gap to the previous one. Falls back to scanning for any free slot only when the ID space is nearly exhausted
+4. Generates a new ID an **arbitrary gap above** that highest sibling — a random gap in the range of 50 (uniform 5–95, e.g. `R-0013` → somewhere in `R-0018`…`R-0108`). The gap guarantees IDs are never near-consecutive and leaves free slots between entries for later mid-priority inserts
+5. If the candidate slot is taken, chains another random gap on top of it; batch generation (`--count`) chains the same way, so every ID in a batch keeps an arbitrary gap to the previous one. Once the end-biased walk would run past the end of the range (`G-999` / `F-9999` / …), it falls back to a **completely random, collision-checked ID** drawn from anywhere in the allowed range
 
 **Valid parent relationships:**
 - `--type feature --parent F-XXXX` → child feature under parent feature

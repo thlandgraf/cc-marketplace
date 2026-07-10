@@ -39,24 +39,20 @@ var ID_FORMAT_REGISTRY = {
 };
 var MAX_GENERATION_ATTEMPTS = 1e3;
 // Each new ID sits an arbitrary gap above the last sibling, in the range of
-// ~10 (uniform 5..15). Gaps leave room for later mid-priority inserts and
+// ~50 (uniform 5..95). Gaps leave room for later mid-priority inserts and
 // avoid the near-consecutive runs (F-0012, F-0013, F-0014, ...) a fixed
 // pick-within-window strategy produces.
 var MIN_ID_GAP = 5;
-var MAX_ID_GAP = 15;
+var MAX_ID_GAP = 95;
 function generateEndBiasedId(lastSiblingId, maxValue, existingIds, digits) {
   let base = lastSiblingId !== null ? lastSiblingId : 0;
   while (base <= maxValue) {
     const gap = MIN_ID_GAP + Math.floor(Math.random() * (MAX_ID_GAP - MIN_ID_GAP + 1));
     const candidate = base + gap;
     if (candidate > maxValue) {
-      // ID space nearly exhausted: take any free slot in the remaining tail
-      for (let c = base + 1; c <= maxValue; c++) {
-        const idStr2 = String(c).padStart(digits, "0");
-        if (!existingIds.has(idStr2)) {
-          return idStr2;
-        }
-      }
+      // Past the end of the ID space: stop the end-biased walk and let the
+      // caller fall back to a completely random, collision-checked id drawn
+      // from anywhere in the allowed range [0, maxValue].
       return null;
     }
     const idStr = String(candidate).padStart(digits, "0");
